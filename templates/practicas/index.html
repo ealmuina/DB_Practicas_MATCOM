@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Bienvenido{% endblock %}
+
+{% block heading %}
+    <h1>Bienvenido</h1>
+
+    <p class="lead">
+        {{ user.first_name }},<br/>
+        {% if days_until %}
+            Resta(n) <strong>{{ days_until }} día(s)</strong> para el comienzo de las Prácticas de Producción.
+        {% elif days_left %}
+            Queda(n) <strong>{{ days_left }} día(s)</strong> para que concluyan las Prácticas de Producción.
+        {% else %}
+            Las Prácticas de Producción concluyeron hace <strong>{{ days_after }} día(s)</strong>.
+        {% endif %}
+    </p>
+
+    <p><a class="btn btn-lg btn-success" href="#" role="button">Sign up today</a></p>
+{% endblock %}

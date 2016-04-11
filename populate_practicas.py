@@ -11,10 +11,14 @@ from practicas.models import *
 
 def populate():
     c14_15 = add_course(start=datetime(2014, 9, 1),
-                        end=datetime(2015, 7, 17))
+                        end=datetime(2015, 7, 17),
+                        practice_start=datetime(2015, 6, 29),
+                        practice_end=datetime(2015, 7, 17))
 
     c15_16 = add_course(start=datetime(2015, 9, 1),
-                        end=datetime(2016, 7, 22))
+                        end=datetime(2016, 7, 22),
+                        practice_start=datetime(2016, 7, 3),
+                        practice_end=datetime(2016, 7, 22))
 
     cs = add_major(name='Ciencia de la Computación',
                    years='5')
@@ -133,9 +137,11 @@ def add_major(name, years):
     return m
 
 
-def add_course(start, end):
+def add_course(start, end, practice_start, practice_end):
     c = Course.objects.get_or_create(start=start,
                                      end=end)[0]
+    c.practice_start = practice_start
+    c.practice_end = practice_end
     c.save()
     return c
 

@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -28,6 +30,13 @@ class Major(models.Model):
 class Course(models.Model):
     start = models.DateField('fecha de inicio')
     end = models.DateField('Fecha de finalización')
+
+    practice_start = models.DateField('fecha de inicio de las prácticas')
+    practice_end = models.DateField('fecha de finalización de las prácticas')
+
+    def practice_running(self):
+        now = date.today()
+        return now >= self.practice_start and now <= self.practice_end
 
     def __str__(self):
         return '%s-%s' % (self.start.year, self.end.year)
