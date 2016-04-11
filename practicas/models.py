@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
+# TODO: Validar que un estudiante registrado solo puede estar en un proyecto de su mismo curso
+
 class Student(models.Model):
     user = models.OneToOneField(User, verbose_name='usuario')
 
@@ -42,7 +44,7 @@ class RegisteredStudent(models.Model):
     group = models.CharField('grupo', max_length=200)
 
     def __str__(self):
-        return str(self.student)
+        return '{0} ({1})'.format(self.student, self.course)
 
     class Meta:
         verbose_name = 'estudiante registrado'
@@ -55,7 +57,7 @@ class Project(models.Model):
 
     name = models.CharField('nombre', max_length=200)
     description = models.CharField('descripción', max_length=200)
-    report = models.FileField('informe del tutor')
+    report = models.FileField('informe del tutor', blank=True)
 
     def __str__(self):
         return self.name
@@ -81,8 +83,8 @@ class Participation(models.Model):
     project = models.ForeignKey('Project', verbose_name='proyecto')
 
     grade = models.IntegerField('calificación')
-    report = models.FileField('informe del estudiante')
-    tutor_report = models.FileField('informe del tutor')
+    report = models.FileField('informe del estudiante', blank=True)
+    tutor_report = models.FileField('informe del tutor', blank=True)
 
     class Meta:
         verbose_name = 'participación'
@@ -93,8 +95,8 @@ class Requirement(models.Model):
     project = models.ForeignKey('Project', verbose_name='proyecto')
     major = models.ForeignKey('Major', verbose_name='carrera')
 
-    students_count = models.IntegerField('cantidad de estudiantes')
     year = models.IntegerField('año')
+    students_count = models.IntegerField('cantidad de estudiantes')
 
     class Meta:
         verbose_name = 'requisito'
@@ -102,8 +104,6 @@ class Requirement(models.Model):
 
 class Tutor(models.Model):
     user = models.OneToOneField(User, verbose_name='usuario')
-
-    workplace = models.ForeignKey('Workplace', verbose_name='centro de trabajo')
 
     DOCTOR = 'DR'
     MASTER = 'MSC'
@@ -113,6 +113,8 @@ class Tutor(models.Model):
                   (BACHELOR, 'Licenciado'))
 
     category = models.CharField('categoría científica', choices=CATEGORIES, max_length=3)
+
+    workplace = models.ForeignKey('Workplace', verbose_name='centro de trabajo')
     job = models.CharField('puesto', max_length=200)
 
     def __str__(self):
@@ -123,8 +125,8 @@ class Tutor(models.Model):
 
 
 class Workplace(models.Model):
-    address = models.CharField('dirección', max_length=200)
     name = models.CharField('nombre', max_length=200)
+    address = models.CharField('dirección', max_length=250)
     phone = models.IntegerField('teléfono')
 
     def __str__(self):
