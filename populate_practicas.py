@@ -47,7 +47,7 @@ def populate():
                     email='j.martinez@lab.matcom.uh.cu',
                     password='1234')
 
-    oscar = add_user(username='oscar luis',
+    oscar = add_user(username='oscar_luis',
                      first_name='Oscar Luis',
                      last_name='Vera',
                      email='oscar@matcom.uh.cu',
@@ -66,31 +66,37 @@ def populate():
     add_registered_student(student=eddy,
                            course=c14_15,
                            major=cs,
+                           year=2,
                            group='C213')
 
     add_registered_student(student=miguel,
                            course=c14_15,
                            major=cs,
+                           year=2,
                            group='C213')
 
     add_registered_student(student=jose,
                            course=c14_15,
                            major=cs,
+                           year=2,
                            group='C213')
 
     add_registered_student(student=eddy,
                            course=c15_16,
                            major=cs,
+                           year=3,
                            group='C312')
 
     add_registered_student(student=miguel,
                            course=c15_16,
                            major=cs,
+                           year=3,
                            group='C312')
 
     add_registered_student(student=jose,
                            course=c15_16,
                            major=cs,
+                           year=3,
                            group='C312')
 
     oscar = add_tutor(user=oscar,
@@ -146,10 +152,11 @@ def add_course(start, end, practice_start, practice_end):
     return c
 
 
-def add_registered_student(student, course, major, group):
+def add_registered_student(student, course, major, year, group):
     rs = RegisteredStudent.objects.get_or_create(student=student,
                                                  course=course,
-                                                 major=major)[0]
+                                                 major=major,
+                                                 year=year)[0]
     rs.group = group
     rs.save()
     return rs

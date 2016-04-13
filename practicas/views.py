@@ -1,22 +1,138 @@
-from datetime import date
-
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render
-
+from django.utils.decorators import method_decorator
+from django.views.generic import DetailView
+from practicas.forms import RequestForm, ProjectForm
 from .models import *
+
+
+def get_course_and_reg_student(request):
+    try:
+        course = Course.objects.get(practice_start__year=date.today().year)
+    except Course.DoesNotExist:
+        course = None
+
+    try:
+        reg_student = RegisteredStudent.objects.get(student__user=request.user, course=course)
+    except RegisteredStudent.DoesNotExist:
+        reg_student = None
+
+    return course, reg_student
 
 
 @login_required
 def index(request):
     context_dict = {}
 
-    course = Course.objects.get(practice_start__year=date.today().year)
+    course, reg_student = get_course_and_reg_student(request)
+
     if course:
         if course.practice_running():
             context_dict['days_left'] = (course.practice_end - date.today()).days
         elif date.today() < course.practice_start:
             context_dict['days_until'] = (course.practice_start - date.today()).days
         else:
+            # Practice is over
             context_dict['days_after'] = (date.today() - course.practice_end).days
+            if reg_student:
+                # Current user is a student
+                grade = Participation.objects.get(reg_student=reg_student).grade
+                context_dict['grade'] = grade
 
     return render(request, 'practicas/index.html', context_dict)
+
+
+@permission_required('practicas.student_permissions')
+def projects(request):
+    course, reg_student = get_course_and_reg_student(request)
+
+    # TODO: Averiguar si puedo pedir valores especificos de los objetos. En plan SELECT project FROM...
+    requirements = Requirement.objects.filter(project__course=course, major=reg_student.major,
+                                              year__lte=reg_student.year)
+    projects = []
+    for req in requirements:
+        if not req.project in projects:
+            projects.append(req.project)
+
+    return render(request, 'practicas/projects.html', {'projects': projects})
+
+
+class ProjectDetailView(DetailView):
+    model = Project
+
+    def get_context_data(self, **kwargs):
+        return super(ProjectDetailView, self).get_context_data(**kwargs)
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ProjectDetailView, self).dispatch(request, *args, **kwargs)
+
+
+@permission_required('practicas.tutor_permissions')
+def project(request):
+    tutor = Tutor.objects.get(user=request.user)
+    try:
+        course = Course.objects.get(practice_start__year=date.today().year)
+    except Course.DoesNotExist:
+        course = None
+
+    # A HTTP POST?
+    if request.method == 'POST':
+        form = ProjectForm(request.POST)
+
+        # Have we been provided with a valid form?
+        if form.is_valid():
+            if tutor and course:
+                project = form.save(commit=False)
+                project.course = course
+                project.tutor = tutor
+                project.save()
+                # Redirect tutor to his projects list
+                # return tutor_projects(request, tutor.user.username)
+                return index(request)  # TODO: Just for now
+        else:
+            # The supplied form contained errors - just print them to the terminal.
+            print(form.errors)
+    else:
+        # If the request wasn;t a POST, display the form to enter details.
+        form = ProjectForm()
+
+    # Bad form (or form details), no form supplied...
+    # Render rhe form with error messages (if any).
+    return render(request, 'practicas/create_project.html', {'form': form})
+
+
+@permission_required('practicas.student_permissions')
+def request(request, project_name_slug):
+    try:
+        project = Project.objects.get(slug=project_name_slug)
+    except Project.DoesNotExist:
+        project = None
+    course, reg_student = get_course_and_reg_student(request)
+
+    # A HTTP POST?
+    if request.method == 'POST':
+        form = RequestForm(request.POST)
+
+        # Have we been provided with a valid form?
+        if form.is_valid():
+            if project and reg_student:
+                req = form.save(commit=False)
+                req.checked = False
+                req.project = project
+                req.reg_student = reg_student
+                # Save the new request to the database and redirect to projects.
+                req.save()
+                return projects(
+                    request)  # TODO: Turn into a redirect, y que me muestre un cartelito de solicitud exitosa.
+                # TODO: else???
+        else:
+            # The supplied form contained errors - just print them to the terminal.
+            print(form.errors)
+    else:
+        # If the request was not a POST, display the form to enter details.
+        form = RequestForm()
+
+    # Bad form (or form details), no form supplied...
+    # Render rhe form with error messages (if any).
+    return render(request, 'practicas/request.html', {'form': form, 'project': project})

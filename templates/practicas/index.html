@@ -10,13 +10,37 @@
     <p class="lead">
         {{ user.first_name }},<br/>
         {% if days_until %}
-            Resta(n) <strong>{{ days_until }} día(s)</strong> para el comienzo de las Prácticas de Producción.
+            resta(n) <strong>{{ days_until }} día(s)</strong> para el comienzo de las Prácticas de Producción.
         {% elif days_left %}
-            Queda(n) <strong>{{ days_left }} día(s)</strong> para que concluyan las Prácticas de Producción.
+            queda(n) <strong>{{ days_left }} día(s)</strong> para que concluyan las Prácticas de Producción.
         {% else %}
-            Las Prácticas de Producción concluyeron hace <strong>{{ days_after }} día(s)</strong>.
+            las Prácticas de Producción concluyeron hace <strong>{{ days_after }} día(s)</strong>.<br/>
+            Tu calificación final es de <h2>{{ grade }} puntos</h2>
         {% endif %}
     </p>
 
     <p><a class="btn btn-lg btn-success" href="#" role="button">Sign up today</a></p>
+{% endblock %}
+
+{% block content %}
+    {% if user.is_superuser %}
+        OMG you are superuser!!! Guess my lord...
+    {% elif 'practicas.student_permissions' in perms %}
+        Eres un estudiante!!!
+        {% if days_until %}
+            <p>
+                Las Prácticas están por comenzar. Entra <a href="{% url 'projects' %}">aquí</a> para elegir en qué
+                proyectos te gustaría participar.
+            </p>
+        {% endif %}
+    {% elif 'practicas.tutor_permissions' in perms %}
+        Usted es un tutor!!!
+        {% if days_until %}
+            <p>
+                Las Prácticas están por comenzar. Entre <a href="{% url 'project-create' %}">aquí</a> si desea crear un
+                nuevo
+                proyecto.
+            </p>
+        {% endif %}
+    {% endif %}
 {% endblock %}

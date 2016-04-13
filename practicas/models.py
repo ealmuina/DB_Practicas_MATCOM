@@ -1,24 +1,33 @@
 from datetime import date
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group, Permission
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.template.defaultfilters import slugify
 
-
-# TODO: Validar que un estudiante registrado solo puede estar en un proyecto de su mismo curso
 
 class Student(models.Model):
-    user = models.OneToOneField(User, verbose_name='usuario')
+    user = models.OneToOneField(User, verbose_name='usuario', unique=True)
+
+    def save(self, *args, **kwargs):
+        student_permissions = Permission.objects.get(codename='student_permissions')
+        self.user.user_permissions.add(student_permissions)
+        super(Student, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.user.get_full_name()
 
     class Meta:
         verbose_name = 'estudiante'
+        permissions = [
+            ('student_permissions', 'Tiene permisos de estudiante')
+        ]
 
 
 class Major(models.Model):
-    name = models.CharField('nombre', max_length=200)
-    years = models.IntegerField('número de años')
+    name = models.CharField('nombre', max_length=200, unique=True)
+    years = models.IntegerField('número de años',
+                                validators=[MinValueValidator(1, message='Toda carrera debe durar más de 1 año.')])
 
     def __str__(self):
         return self.name
@@ -28,11 +37,11 @@ class Major(models.Model):
 
 
 class Course(models.Model):
-    start = models.DateField('fecha de inicio')
-    end = models.DateField('Fecha de finalización')
+    start = models.DateField('fecha de inicio', unique=True)
+    end = models.DateField('Fecha de finalización', unique=True)
 
-    practice_start = models.DateField('fecha de inicio de las prácticas')
-    practice_end = models.DateField('fecha de finalización de las prácticas')
+    practice_start = models.DateField('fecha de inicio de las prácticas', unique=True)
+    practice_end = models.DateField('fecha de finalización de las prácticas', unique=True)
 
     def practice_running(self):
         now = date.today()
@@ -50,6 +59,8 @@ class RegisteredStudent(models.Model):
     course = models.ForeignKey('Course', verbose_name='curso')
     major = models.ForeignKey('Major', verbose_name='carrera')
 
+    year = models.IntegerField('año',
+                               validators=[MinValueValidator(1, message='Las carreras comienzan a partir del año 1.')])
     group = models.CharField('grupo', max_length=200)
 
     def __str__(self):
@@ -58,6 +69,7 @@ class RegisteredStudent(models.Model):
     class Meta:
         verbose_name = 'estudiante registrado'
         verbose_name_plural = 'estudiantes registrados'
+        unique_together = ('student', 'course')
 
 
 class Project(models.Model):
@@ -65,8 +77,14 @@ class Project(models.Model):
     tutor = models.ForeignKey('Tutor')
 
     name = models.CharField('nombre', max_length=200)
-    description = models.CharField('descripción', max_length=200)
+    description = models.TextField('descripción')
     report = models.FileField('informe del tutor', blank=True)
+
+    slug = models.SlugField()
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name)
+        super(Project, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -79,21 +97,29 @@ class Request(models.Model):
     reg_student = models.ForeignKey('RegisteredStudent', verbose_name='estudiante registrado')
     project = models.ForeignKey('Project', verbose_name='proyecto')
 
-    priority = models.IntegerField('prioridad')
-    checked = models.BooleanField('confirmación del tutor')
+    priority = models.PositiveIntegerField('prioridad')
+    checked = models.BooleanField('confirmación del tutor', default=False)
+
+    def __str__(self):
+        return "{0} a {1} ({2})".format(self.reg_student.student, self.project, self.project.course)
 
     class Meta:
         verbose_name = 'solicitud'
         verbose_name_plural = 'solicitudes'
+        unique_together = ('reg_student', 'project')
 
 
 class Participation(models.Model):
     reg_student = models.OneToOneField('RegisteredStudent', verbose_name='estudiante registrado')
     project = models.ForeignKey('Project', verbose_name='proyecto')
 
-    grade = models.IntegerField('calificación')
+    grade = models.PositiveIntegerField('calificación', blank=True,
+                                        validators=[MaxValueValidator(5, "La máxima calificación es 5.")])
     report = models.FileField('informe del estudiante', blank=True)
     tutor_report = models.FileField('informe del tutor', blank=True)
+
+    def __str__(self):
+        return "{0} en {1} ({2})".format(self.reg_student.student, self.project, self.project.course)
 
     class Meta:
         verbose_name = 'participación'
@@ -104,15 +130,19 @@ class Requirement(models.Model):
     project = models.ForeignKey('Project', verbose_name='proyecto')
     major = models.ForeignKey('Major', verbose_name='carrera')
 
-    year = models.IntegerField('año')
-    students_count = models.IntegerField('cantidad de estudiantes')
+    year = models.IntegerField('año',
+                               validators=[
+                                   MinValueValidator(1, message='Toda carrera tiene duración mayor que 1 año.')])
+    students_count = models.IntegerField('cantidad de estudiantes', validators=[MinValueValidator(1,
+                                                                                                  "En el proyecto debe participar al menos 1 estudiante.")])
 
     class Meta:
         verbose_name = 'requisito'
+        unique_together = ('project', 'major', 'year')
 
 
 class Tutor(models.Model):
-    user = models.OneToOneField(User, verbose_name='usuario')
+    user = models.OneToOneField(User, verbose_name='usuario', unique=True)
 
     DOCTOR = 'DR'
     MASTER = 'MSC'
@@ -126,17 +156,25 @@ class Tutor(models.Model):
     workplace = models.ForeignKey('Workplace', verbose_name='centro de trabajo')
     job = models.CharField('puesto', max_length=200)
 
+    def save(self, *args, **kwargs):
+        tutor_permissions = Permission.objects.get(codename='tutor_permissions')
+        self.user.user_permissions.add(tutor_permissions)
+        super(Tutor, self).save(*args, **kwargs)
+
     def __str__(self):
         return self.user.get_full_name()
 
     class Meta:
         verbose_name_plural = 'tutores'
+        permissions = [
+            ('tutor_permissions', 'Tiene permisos de tutor')
+        ]
 
 
 class Workplace(models.Model):
-    name = models.CharField('nombre', max_length=200)
+    name = models.CharField('nombre', max_length=200, unique=True)
     address = models.CharField('dirección', max_length=250)
-    phone = models.IntegerField('teléfono')
+    phone = models.PositiveIntegerField('teléfono')
 
     def __str__(self):
         return self.name

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Proyecto | {{ object.name }}{% endblock %}
+
+{% block heading %}
+    <h2>{{ object.name }}</h2>
+{% endblock %}
+
+{% block content %}
+    <p><strong>Curso:</strong> {{ object.course }}</p>
+    <p><strong>Tutor:</strong> {{ object.tutor }}</p><br/>
+
+    <p>{{ object.description }}</p>
+    <a href="{% url 'request' object.slug %}">Solicitar</a>
+{% endblock %}

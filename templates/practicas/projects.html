@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Proyectos disponibles{% endblock %}
+
+{% block heading %}
+    <h2>Proyectos disponibles para {{ user.get_full_name }}</h2>
+{% endblock %}
+
+{% block content %}
+    {% if projects %}
+
+        <ul>
+            {% for project in projects %}
+                {#TODO: Ponerle un icono a los que ya se solicitaron. Preferiblemente con la puntuacion que se les dio.#}
+                <li><a href="{% url 'project-detail' project.slug %}">{{ project.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        No hay proyectos disponibles para usted en este momento.
+    {% endif %}
+{% endblock %}
+
+{#TODO: Añadir requerimientos al proyecto#}

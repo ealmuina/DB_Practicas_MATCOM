@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}\
+{% load bootstrap3 %}
+
+{% block title %}Proyectos | Solicitud{% endblock %}
+
+{% block heading %}
+    <h3>{{ project.name }}</h3>
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">Solicitar</button>
+            <a class="btn btn-default" href="{% url 'projects' %}" role="button">Volver al listado</a>
+        {% endbuttons %}
+    </form>
+{% endblock %}
