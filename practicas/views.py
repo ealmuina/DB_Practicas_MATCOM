@@ -1,7 +1,9 @@
 from django.contrib.auth.decorators import login_required, permission_required
-from django.shortcuts import render
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
+
 from practicas.forms import RequestForm, ProjectForm
 from .models import *
 
@@ -43,7 +45,7 @@ def index(request):
 
 
 @permission_required('practicas.student_permissions')
-def projects(request):
+def projects_available(request):
     course, reg_student = get_course_and_reg_student(request)
 
     # TODO: Averiguar si puedo pedir valores especificos de los objetos. En plan SELECT project FROM...
@@ -54,22 +56,52 @@ def projects(request):
         if not req.project in projects:
             projects.append(req.project)
 
-    return render(request, 'practicas/projects.html', {'projects': projects})
+    return render(request, 'practicas/available_projects.html', {'projects': projects})
 
 
 class ProjectDetailView(DetailView):
     model = Project
 
     def get_context_data(self, **kwargs):
-        return super(ProjectDetailView, self).get_context_data(**kwargs)
+        context = super(ProjectDetailView, self).get_context_data(**kwargs)
+
+        project = context['object']
+        try:
+            reg_student = RegisteredStudent.objects.get(student__user=self.request.user, course=project.course)
+        except RegisteredStudent.DoesNotExist:
+            reg_student = None
+
+        if reg_student:
+            try:
+                context['request'] = Request.objects.get(project=project, reg_student=reg_student)
+            except Request.DoesNotExist:
+                context['request'] = None
+
+        return context
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        return super(ProjectDetailView, self).dispatch(request, *args, **kwargs)
+        return super(ProjectDetailView, self).dispatch(request, *args, **kwargs)  # def request_remove(request):
+
+
+@permission_required('practicas.student_permissions')
+def request_remove(request, project_name_slug):
+    course, reg_student = get_course_and_reg_student(request)
+    project = get_object_or_404(Project, slug=project_name_slug)
+
+    req = get_object_or_404(Request, project=project, reg_student=reg_student)
+    if not req.checked:
+        req.delete()
+        return redirect('project-detail', project_name_slug, permanent=True)
+    else:
+        return HttpResponseForbidden(
+            """<h1>Error</h1>
+            Su solicitud ha sido validada por el tutor del proyecto.
+            Por favor, comuníquese con este si desea cancelarla.""")
 
 
 @permission_required('practicas.tutor_permissions')
-def project(request):
+def project_create(request):
     tutor = Tutor.objects.get(user=request.user)
     try:
         course = Course.objects.get(practice_start__year=date.today().year)
@@ -110,6 +142,15 @@ def request(request, project_name_slug):
         project = None
     course, reg_student = get_course_and_reg_student(request)
 
+    # Verify the reg_student hasn't made a request to this project already.
+    try:
+        req = Request.objects.get(reg_student=reg_student, project=project)
+    except Request.DoesNotExist:
+        req = None
+
+    if req:
+        return HttpResponseForbidden("<h1>Error</h1>La solicitud que intenta crear ya existe.")
+
     # A HTTP POST?
     if request.method == 'POST':
         form = RequestForm(request.POST)
@@ -123,7 +164,7 @@ def request(request, project_name_slug):
                 req.reg_student = reg_student
                 # Save the new request to the database and redirect to projects.
                 req.save()
-                return projects(
+                return projects_available(
                     request)  # TODO: Turn into a redirect, y que me muestre un cartelito de solicitud exitosa.
                 # TODO: else???
         else:

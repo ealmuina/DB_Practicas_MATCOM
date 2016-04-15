@@ -13,5 +13,11 @@
     <p><strong>Tutor:</strong> {{ object.tutor }}</p><br/>
 
     <p>{{ object.description }}</p>
-    <a href="{% url 'request' object.slug %}">Solicitar</a>
+    {% if not request %}
+        <a class="btn btn-primary" href="{% url 'request' object.slug %}" role="button">Solicitar</a>
+    {% elif not request.checked %}
+        <a class="btn btn-primary" href="{% url 'request-remove' object.slug %}" role="button">Cancelar solicitud</a>
+    {% else %}
+        Su solicitud ha sido validada por el tutor del proyecto. Por favor, comuníquese con este si desea cancelarla.
+    {% endif %}
 {% endblock %}
