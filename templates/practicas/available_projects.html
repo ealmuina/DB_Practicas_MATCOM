@@ -9,17 +9,28 @@
 {% endblock %}
 
 {% block content %}
-    {% if projects %}
-
+    {% if available_projects %}
+        <p>
+        <h4>Proyectos solicitables:</h4>
         <ul>
-            {% for project in projects %}
-                {#TODO: Ponerle un icono a los que ya se solicitaron. Preferiblemente con la puntuacion que se les dio.#}
+            {% for project in available_projects %}
                 <li><a href="{% url 'project-detail' project.slug %}">{{ project.name }}</a></li>
             {% endfor %}
         </ul>
+        </p>
     {% else %}
-        No hay proyectos disponibles para usted en este momento.
+        No existen proyectos solicitables para usted en este momento.
+    {% endif %}
+
+    {% if requested_projects %}
+        <p>
+        <h4>Proyectos solicitados:</h4>
+        <ol>
+            {% for req in requested_projects %}
+                <li value="{{ req.priority }}"><a
+                        href="{% url 'project-detail' req.project.slug %}">{{ req.project.name }}</a></li>
+            {% endfor %}
+        </ol>
+        </p>
     {% endif %}
 {% endblock %}
-
-{#TODO: Añadir requerimientos al proyecto#}

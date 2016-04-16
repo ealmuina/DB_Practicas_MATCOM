@@ -51,12 +51,19 @@ def projects_available(request):
     # TODO: Averiguar si puedo pedir valores especificos de los objetos. En plan SELECT project FROM...
     requirements = Requirement.objects.filter(project__course=course, major=reg_student.major,
                                               year__lte=reg_student.year)
-    projects = []
+    available_projects = []
     for req in requirements:
-        if not req.project in projects:
-            projects.append(req.project)
+        if not req.project in available_projects:
+            available_projects.append(req.project)
 
-    return render(request, 'practicas/available_projects.html', {'projects': projects})
+    requested_projects = []
+    requests = Request.objects.filter(reg_student=reg_student)
+    for req in requests:
+        available_projects.remove(req.project)
+        requested_projects.append(req)
+
+    return render(request, 'practicas/available_projects.html',
+                  {'available_projects': available_projects, 'requested_projects': requested_projects})
 
 
 class ProjectDetailView(DetailView):
