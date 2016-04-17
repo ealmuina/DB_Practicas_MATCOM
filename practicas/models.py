@@ -80,10 +80,11 @@ class Project(models.Model):
     description = models.TextField('descripción')
     report = models.FileField('informe del tutor', blank=True)
 
-    slug = models.SlugField()
+    slug = models.SlugField(editable=False)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
+        self.course = Course.objects.get(start__lte=date.today(), end__gte=date.today())
         super(Project, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -159,6 +160,20 @@ class Tutor(models.Model):
     def save(self, *args, **kwargs):
         tutor_permissions = Permission.objects.get(codename='tutor_permissions')
         self.user.user_permissions.add(tutor_permissions)
+
+        change_participation = Permission.objects.get(codename='change_participation')
+        add_project = Permission.objects.get(codename='add_project')
+        change_project = Permission.objects.get(codename='change_project')
+        change_request = Permission.objects.get(codename='change_request')
+        delete_request = Permission.objects.get(codename='delete_request')
+        add_requirement = Permission.objects.get(codename='add_requirement')
+        change_requirement = Permission.objects.get(codename='change_requirement')
+        delete_requirement = Permission.objects.get(codename='delete_requirement')
+
+        self.user.is_staff = True
+        self.user.user_permissions.add(change_participation, add_project, change_project, change_request,
+                                       delete_request, add_requirement, change_requirement, delete_requirement)
+
         super(Tutor, self).save(*args, **kwargs)
 
     def __str__(self):

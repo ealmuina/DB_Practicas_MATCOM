@@ -89,17 +89,34 @@ class RegisteredStudentForm(forms.ModelForm):
         exclude = ()
 
 
-class ProjectAdminForm(forms.ModelForm):
-    slug = forms.CharField(widget=forms.HiddenInput(), required=False)
-
-    class Meta:
-        model = Project
-        exclude = ()
-
-
 class ProjectForm(forms.ModelForm):
-    slug = forms.CharField(widget=forms.HiddenInput(), required=False)
-
     class Meta:
         model = Project
-        exclude = ('course', 'tutor')
+        exclude = ('slug', 'course')
+
+# class TutorForm(forms.ModelForm):
+#     first_name = forms.CharField(label='Nombre')
+#     last_name = forms.CharField(label='Apellidos')
+#     username = forms.CharField(label='Nombre de usuario')
+#     password = forms.CharField(widget=forms.PasswordInput())
+#     email = forms.EmailField()
+#
+#     user = forms.IntegerField(widget=forms.HiddenInput())
+#
+#     def clean(self):
+#         cleaned_data = self.cleaned_data
+#
+#         username = cleaned_data['username']
+#         email = cleaned_data['email']
+#         password = cleaned_data['password']
+#         first_name = cleaned_data['first_name']
+#         last_name = cleaned_data['last_name']
+#
+#         user = User(username=username, email=email, password=password, first_name=first_name, last_name=last_name)
+#         cleaned_data['user'] = user
+#
+#         return cleaned_data
+#
+#     class Meta:
+#         model = Tutor
+#         exclude = ()

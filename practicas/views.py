@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView
 
-from practicas.forms import RequestForm, ProjectForm
+from practicas.forms import RequestForm
 from .models import *
 
 
@@ -107,40 +107,6 @@ def request_remove(request, project_name_slug):
             Por favor, comuníquese con este si desea cancelarla.""")
 
 
-@permission_required('practicas.tutor_permissions')
-def project_create(request):
-    tutor = Tutor.objects.get(user=request.user)
-    try:
-        course = Course.objects.get(practice_start__year=date.today().year)
-    except Course.DoesNotExist:
-        course = None
-
-    # A HTTP POST?
-    if request.method == 'POST':
-        form = ProjectForm(request.POST)
-
-        # Have we been provided with a valid form?
-        if form.is_valid():
-            if tutor and course:
-                project = form.save(commit=False)
-                project.course = course
-                project.tutor = tutor
-                project.save()
-                # Redirect tutor to his projects list
-                # return tutor_projects(request, tutor.user.username)
-                return index(request)  # TODO: Just for now
-        else:
-            # The supplied form contained errors - just print them to the terminal.
-            print(form.errors)
-    else:
-        # If the request wasn;t a POST, display the form to enter details.
-        form = ProjectForm()
-
-    # Bad form (or form details), no form supplied...
-    # Render rhe form with error messages (if any).
-    return render(request, 'practicas/create_project.html', {'form': form})
-
-
 @permission_required('practicas.student_permissions')
 def request(request, project_name_slug):
     try:
@@ -173,7 +139,6 @@ def request(request, project_name_slug):
                 req.save()
                 return projects_available(
                     request)  # TODO: Turn into a redirect, y que me muestre un cartelito de solicitud exitosa.
-                # TODO: else???
         else:
             # The supplied form contained errors - just print them to the terminal.
             print(form.errors)

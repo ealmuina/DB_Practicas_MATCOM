@@ -1,8 +1,14 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 
-from .forms import CourseForm, RequestAdminForm, ParticipationForm, RegisteredStudentForm, ProjectAdminForm
+from .forms import CourseForm, RequestAdminForm, ParticipationForm, RegisteredStudentForm, ProjectForm
 from .models import *
+
+
+def get_current_course():
+    return Course.objects.get(start__lte=date.today(), end__gte=date.today())
 
 
 class AdminSite(admin.AdminSite):
@@ -73,7 +79,51 @@ class ProjectAdmin(admin.ModelAdmin):
     search_fields = ['name', 'tutor__user__first_name', 'tutor__user__last_name']
     list_filter = ['course']
     inlines = [RequirementInline, ParticipationInline, RequestProjectInline]
-    form = ProjectAdminForm
+    form = ProjectForm
+
+    def save_model(self, request, obj, form, change):
+        if not request.user.is_superuser:
+            obj.tutor = Tutor.objects.get(user=request.user)
+        super(ProjectAdmin, self).save_model(request, obj, form, change)
+
+    def get_queryset(self, request):
+        qs = super(ProjectAdmin, self).get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+
+        course = get_current_course()
+        if date.today() > course.practice_start:
+            # Practice is already started. Tutors can't modify their projects once started.
+            return qs.filter(tutor=None)
+        return qs.filter(tutor__user=request.user)
+
+    def get_fields(self, request, obj=None):
+        fields = super(ProjectAdmin, self).get_fields(request, obj)
+        if not request.user.is_superuser:
+            fields.remove('tutor')
+        return fields
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        course = get_current_course()
+
+        if not self.get_queryset(request).filter(id=object_id).exists() or date.today() > course.practice_start:
+            return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
+
+        return super(ProjectAdmin, self).change_view(request, object_id, form_url, extra_context)
+
+    def delete_view(self, request, object_id, extra_context=None):
+        course = get_current_course()
+
+        if not self.get_queryset(request).filter(id=object_id).exists() or date.today() > course.practice_start:
+            return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
+        return super(ProjectAdmin, self).delete_view(request, object_id, extra_context)
+
+    def history_view(self, request, object_id, extra_context=None):
+        course = get_current_course()
+
+        if not self.get_queryset(request).filter(id=object_id).exists() or date.today() > course.practice_start:
+            return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
+        return super(ProjectAdmin, self).history_view(request, object_id, extra_context)
 
 
 class TutorAdmin(admin.ModelAdmin):
