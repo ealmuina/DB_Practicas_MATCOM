@@ -5,21 +5,23 @@
 {% block title %}Bienvenido{% endblock %}
 
 {% block heading %}
-    <h1>Bienvenido</h1>
+    <div class="jumbotron">
+        <h1>Bienvenido</h1>
 
-    <p class="lead">
-        {{ user.first_name }},<br/>
-        {% if days_until %}
-            resta(n) <strong>{{ days_until }} día(s)</strong> para el comienzo de las Prácticas de Producción.
-        {% elif days_left %}
-            queda(n) <strong>{{ days_left }} día(s)</strong> para que concluyan las Prácticas de Producción.
-        {% else %}
-            las Prácticas de Producción concluyeron hace <strong>{{ days_after }} día(s)</strong>.<br/>
-            Tu calificación final es de <h2>{{ grade }} puntos</h2>
-        {% endif %}
-    </p>
+        <p class="lead">
+            {{ user.first_name }},<br/>
+            {% if days_until %}
+                resta(n) <strong>{{ days_until }} día(s)</strong> para el comienzo de las Prácticas de Producción.
+            {% elif days_left %}
+                queda(n) <strong>{{ days_left }} día(s)</strong> para que concluyan las Prácticas de Producción.
+            {% else %}
+                las Prácticas de Producción concluyeron hace <strong>{{ days_after }} día(s)</strong>.<br/>
+                Tu calificación final es de <h2>{{ grade }} puntos</h2>
+            {% endif %}
+        </p>
 
-    <p><a class="btn btn-lg btn-success" href="#" role="button">Sign up today</a></p>
+        <p><a class="btn btn-lg btn-success" href="#" role="button">Sign up today</a></p>
+    </div>
 {% endblock %}
 
 {% block content %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Archivo | Proyectos{% endblock %}
+
+{% block heading %}
+    <h2>Proyectos:</h2>
+{% endblock %}
+
+{% block content %}
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Tutor</th>
+            <th>Curso</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for project in object_list %}
+            <tr>
+                <td><a href="{% url 'archive-project-detail' project.slug %}">{{ project.name }}</a></td>
+                <td>{{ project.tutor }}</td>
+                <td>{{ project.course }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

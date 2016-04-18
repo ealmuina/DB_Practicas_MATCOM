@@ -79,7 +79,7 @@ class RegisteredStudentForm(forms.ModelForm):
         if major and year:
             if major.years < year:
                 raise ValidationError(
-                    "El año que cursa el estudiante no es válido. Su carrera solamente tiene {0} años.".format(
+                    "El año que cursa el estudiante no es válido. Su carrera consta de {0} años.".format(
                         major.years))
 
         return cleaned_data
@@ -92,7 +92,7 @@ class RegisteredStudentForm(forms.ModelForm):
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        exclude = ('slug', 'course')
+        exclude = ('slug',)
 
 # class TutorForm(forms.ModelForm):
 #     first_name = forms.CharField(label='Nombre')

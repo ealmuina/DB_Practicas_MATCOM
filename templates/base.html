@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 {% load staticfiles %}
 
@@ -36,7 +36,7 @@
             <nav>
                 <ul class="nav nav-pills pull-right">
                     <li role="presentation" class="active"><a href="{% url 'index' %}">Inicio</a></li>
-                    {#                    <li role="presentation"><a href="#">About</a></li>#}
+                    <li role="presentation"><a href="{% url 'archive-projects' %}">Archivo</a></li>
                     <li role="presentation"><a href="{% url 'auth_logout' %}?next=/index/">Cerrar sesión</a></li>
                 </ul>
             </nav>
@@ -44,16 +44,7 @@
         </div>
     {% endblock %}
 
-    <div class="jumbotron">
-        {% block heading %}
-            <h1>Jumbotron heading</h1>
-
-            <p class="lead">Cras justo odio, dapibus ac facilisis in, egestas eget quam. Fusce dapibus, tellus ac cursus
-                commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-
-            <p><a class="btn btn-lg btn-success" href="#" role="button">Sign up today</a></p>
-        {% endblock %}
-    </div>
+    {% block heading %}{% endblock %}
 
     <div class="row marketing">
         {% block content %}

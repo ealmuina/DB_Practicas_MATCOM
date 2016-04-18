@@ -13,12 +13,18 @@
     <p><strong>Tutor:</strong> {{ object.tutor }}</p><br/>
 
     <p>{{ object.description }}</p>
-    {% if not request %}
-        <a class="btn btn-primary" href="{% url 'request' object.slug %}" role="button">Solicitar</a>
-    {% elif not request.checked %}
-        <a class="btn btn-primary" href="{% url 'request-remove' object.slug %}" role="button">Cancelar solicitud</a>
-    {% else %}
-        Su solicitud ha sido validada por el tutor del proyecto. Por favor, comuníquese con este si desea cancelarla.
-    {% endif %}
-    <a class="btn btn-default" href="{% url 'available_projects' %}" role="button">Volver al listado</a>
+    <p>{{ object.report }}</p><br/>
+
+    {% block buttons %}
+        {% if not request %}
+            <a class="btn btn-primary" href="{% url 'request' object.slug %}" role="button">Solicitar</a>
+        {% elif not request.checked %}
+            <a class="btn btn-primary" href="{% url 'request-remove' object.slug %}" role="button">Cancelar
+                solicitud</a>
+        {% else %}
+            Su solicitud ha sido validada por el tutor del proyecto. Por favor, comuníquese con este si desea
+            cancelarla.
+        {% endif %}
+        <a class="btn btn-default" href="{% url 'available_projects' %}" role="button">Volver al listado</a>
+    {% endblock %}
 {% endblock %}

@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.decorators import method_decorator
-from django.views.generic import DetailView
+from django.views.generic import DetailView, ListView
 
 from practicas.forms import RequestForm
 from .models import *
@@ -88,7 +88,20 @@ class ProjectDetailView(DetailView):
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
-        return super(ProjectDetailView, self).dispatch(request, *args, **kwargs)  # def request_remove(request):
+        return super(ProjectDetailView, self).dispatch(request, *args, **kwargs)
+
+
+class ArchiveProjectDetailView(DetailView):
+    model = Project
+    template_name = 'practicas/archive_project_detail.html'
+
+    def get_context_data(self, **kwargs):
+        # TODO: Agregar las participaciones en el proyecto!
+        return super(ArchiveProjectDetailView, self).get_context_data(**kwargs)
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(ArchiveProjectDetailView, self).dispatch(request, *args, **kwargs)
 
 
 @permission_required('practicas.student_permissions')
@@ -149,3 +162,8 @@ def request(request, project_name_slug):
     # Bad form (or form details), no form supplied...
     # Render rhe form with error messages (if any).
     return render(request, 'practicas/request.html', {'form': form, 'project': project})
+
+
+class ProjectArchive(ListView):
+    model = Project
+    template_name = 'practicas/archive_projects.html'

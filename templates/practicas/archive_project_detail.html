@@ -1,0 +1,14 @@
+{% extends 'practicas/project_detail.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Archivo | Proyectos | {{ object.name }}{% endblock %}
+
+{% block heading %}
+    <h2>{{ object.name }}</h2>
+{% endblock %}
+
+{% block buttons %}
+    <!-- TODO: Ver si se puede convertir en un BACK -->
+    <a class="btn btn-primary" href="{% url 'archive-projects' %}" role="button">Volver al archivo</a>
+{% endblock %}

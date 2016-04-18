@@ -84,7 +84,6 @@ class Project(models.Model):
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
-        self.course = Course.objects.get(start__lte=date.today(), end__gte=date.today())
         super(Project, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -98,7 +97,7 @@ class Request(models.Model):
     reg_student = models.ForeignKey('RegisteredStudent', verbose_name='estudiante registrado')
     project = models.ForeignKey('Project', verbose_name='proyecto')
 
-    priority = models.PositiveIntegerField('prioridad')
+    priority = models.PositiveIntegerField('prioridad', default=1)
     checked = models.BooleanField('confirmación del tutor', default=False)
 
     def __str__(self):
