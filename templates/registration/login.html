@@ -14,6 +14,12 @@
 
         <h2 class="form-signin-heading">Inicio de Sesión</h2>
 
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+                <strong>ERROR.</strong> {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
         <input class="form-control" placeholder="Nombre de usuario" id="id_username" maxlength="254" name="username"
                type="text"
                required autofocus=""/>

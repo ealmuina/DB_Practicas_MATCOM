@@ -22,8 +22,10 @@
             <a class="btn btn-primary" href="{% url 'request-remove' object.slug %}" role="button">Cancelar
                 solicitud</a>
         {% else %}
-            Su solicitud ha sido validada por el tutor del proyecto. Por favor, comuníquese con este si desea
-            cancelarla.
+            <p>
+                Su solicitud ha sido validada por el tutor del proyecto. Por favor, comuníquese con este si desea
+                cancelarla.
+            </p><br/>
         {% endif %}
         <a class="btn btn-default" href="{% url 'available_projects' %}" role="button">Volver al listado</a>
     {% endblock %}

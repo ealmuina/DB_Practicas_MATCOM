@@ -103,6 +103,12 @@ class ProjectAdmin(admin.ModelAdmin):
             return qs.filter(tutor=None)
         return qs.filter(tutor__user=request.user, course=course)
 
+    def get_inline_instances(self, request, obj=None):
+        inlines = super(ProjectAdmin, self).get_inline_instances(request, obj)
+        if not request.user.is_superuser:
+            inlines.remove(ParticipationInline)
+        return [inline(self.model, self.admin_site) for inline in inlines]
+
     def get_fields(self, request, obj=None):
         fields = super(ProjectAdmin, self).get_fields(request, obj)
         if not request.user.is_superuser:
@@ -111,25 +117,28 @@ class ProjectAdmin(admin.ModelAdmin):
         return fields
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        course = get_object_course(object_id)
+        if not request.user.is_superuser:
+            course = get_object_course(object_id)
 
-        if not self.get_queryset(request).filter(id=object_id).exists() or date.today() > course.practice_start:
-            return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
+            if not self.get_queryset(request).filter(id=object_id).exists() or date.today() > course.practice_start:
+                return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
 
         return super(ProjectAdmin, self).change_view(request, object_id, form_url, extra_context)
 
     def delete_view(self, request, object_id, extra_context=None):
-        course = get_object_course(object_id)
+        if not request.user.is_superuser:
+            course = get_object_course(object_id)
 
-        if not self.get_queryset(request).filter(id=object_id).exists() or date.today() > course.practice_start:
-            return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
+            if not self.get_queryset(request).filter(id=object_id).exists() or date.today() > course.practice_start:
+                return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
+
         return super(ProjectAdmin, self).delete_view(request, object_id, extra_context)
 
     def history_view(self, request, object_id, extra_context=None):
-        course = get_current_course()
+        if not request.user.is_superuser:
+            if not self.get_queryset(request).filter(id=object_id).exists():
+                return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
 
-        if not self.get_queryset(request).filter(id=object_id).exists():
-            return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
         return super(ProjectAdmin, self).history_view(request, object_id, extra_context)
 
 

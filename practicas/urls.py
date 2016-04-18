@@ -11,5 +11,6 @@ urlpatterns = [
     url(r'^projects/(?P<project_name_slug>[-\w]+)/remove_request/$', views.request_remove, name='request-remove'),
     url(r'^archive/projects/$', views.ProjectArchive.as_view(), name='archive-projects'),
     url(r'^archive/projects/(?P<slug>[-\w]+)/$', views.ArchiveProjectDetailView.as_view(),
-        name='archive-project-detail')
+        name='archive-project-detail'),
+    url(r'^participations/(?P<participation_id>[0-9]+)/$', views.evaluate_participation, name='participation-evaluate')
 ]

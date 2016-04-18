@@ -32,8 +32,13 @@
         {% if days_until %}
             <p>
                 Las Prácticas están por comenzar. Entra <a href="{% url 'available_projects' %}">aquí</a> para elegir en
-                qué
-                proyectos te gustaría participar.
+                qué proyectos te gustaría participar.
+            </p>
+        {% endif %}
+        {% if days_left %}
+            <p>
+                <!--TODO: Buscar que poner para que aparezca un boton para subir el archivo-->
+                ¿Has terminado tu proyecto de prácticas? Entra aquí para subir tu informe.
             </p>
         {% endif %}
     {% elif 'practicas.tutor_permissions' in perms %}

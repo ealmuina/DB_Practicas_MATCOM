@@ -113,7 +113,7 @@ class Participation(models.Model):
     reg_student = models.OneToOneField('RegisteredStudent', verbose_name='estudiante registrado')
     project = models.ForeignKey('Project', verbose_name='proyecto')
 
-    grade = models.PositiveIntegerField('calificación', blank=True,
+    grade = models.PositiveIntegerField('calificación', blank=True, null=True,
                                         validators=[MaxValueValidator(5, "La máxima calificación es 5.")])
     report = models.FileField('informe del estudiante', blank=True)
     tutor_report = models.FileField('informe del tutor', blank=True)
@@ -133,8 +133,17 @@ class Requirement(models.Model):
     year = models.IntegerField('año',
                                validators=[
                                    MinValueValidator(1, message='Toda carrera tiene duración mayor que 1 año.')])
-    students_count = models.IntegerField('cantidad de estudiantes', validators=[MinValueValidator(1,
-                                                                                                  "En el proyecto debe participar al menos 1 estudiante.")])
+    students_count = models.IntegerField('cantidad de estudiantes', validators=[
+        MinValueValidator(1, "En el proyecto debe participar al menos 1 estudiante.")])
+
+    def delete(self, using=None, keep_parents=False):
+        super(Requirement, self).delete(using, keep_parents)
+
+        requests = Request.objects.filter(project=self.project)
+        for req in requests:
+            if not Requirement.objects.filter(project=self.project, major=req.reg_student.major,
+                                              year__lte=req.reg_student.year).exists():
+                req.delete()
 
     class Meta:
         verbose_name = 'requisito'
@@ -164,14 +173,13 @@ class Tutor(models.Model):
         add_project = Permission.objects.get(codename='add_project')
         change_project = Permission.objects.get(codename='change_project')
         change_request = Permission.objects.get(codename='change_request')
-        delete_request = Permission.objects.get(codename='delete_request')
         add_requirement = Permission.objects.get(codename='add_requirement')
         change_requirement = Permission.objects.get(codename='change_requirement')
         delete_requirement = Permission.objects.get(codename='delete_requirement')
 
         self.user.is_staff = True
         self.user.user_permissions.add(change_participation, add_project, change_project, change_request,
-                                       delete_request, add_requirement, change_requirement, delete_requirement)
+                                       add_requirement, change_requirement, delete_requirement)
 
         super(Tutor, self).save(*args, **kwargs)
 

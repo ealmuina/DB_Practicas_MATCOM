@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, ListView
 
-from practicas.forms import RequestForm
+from practicas.forms import RequestForm, ParticipationForm
 from .models import *
 
 
@@ -167,3 +167,33 @@ def request(request, project_name_slug):
 class ProjectArchive(ListView):
     model = Project
     template_name = 'practicas/archive_projects.html'
+
+
+@permission_required('practicas.tutor_permissions')
+def evaluate_participation(request, participation_id):
+    participation = get_object_or_404(Participation, id=participation_id)
+    tutor = Tutor.objects.get(user=request.user)
+
+    if tutor != participation.project.tutor:
+        return HttpResponseForbidden(
+            "<h1>Error</h1>Usted no tiene permisos para modificar la participación solicitada.")
+
+    # A HTTP POST?
+    if request.method == 'POST':
+        form = ParticipationForm(request.POST)
+
+        # Have been provided with a valid form?
+        if form.is_valid():
+            part = form.save(commit=True)
+            # TODO: Arreglar para donde redirecciono
+            return index(request)
+        else:
+            # The supplied form contained errors - just print them to the terminal.
+            print(form.errors)
+    else:
+        # If the request was not a POST, display the form to enter details.
+        form = ParticipationForm(participation)
+
+    # Bad form (or form details), no form supplied...
+    # Render rhe form with error messages (if any).
+    return render(request, 'practicas/evaluate_participation.html', {'form': form, 'participation': participation})
