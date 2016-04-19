@@ -103,11 +103,13 @@ class ProjectAdmin(admin.ModelAdmin):
             return qs.filter(tutor=None)
         return qs.filter(tutor__user=request.user, course=course)
 
-    def get_inline_instances(self, request, obj=None):
-        inlines = super(ProjectAdmin, self).get_inline_instances(request, obj)
-        if not request.user.is_superuser:
-            inlines.remove(ParticipationInline)
-        return [inline(self.model, self.admin_site) for inline in inlines]
+    # def get_inline_instances(self, request, obj=None):
+    #     inlines = super(ProjectAdmin, self).get_inline_instances(request, obj)
+    #     if not request.user.is_superuser:
+    #         for x in inlines:
+    #             if type(x) is ParticipationInline:
+    #                 inlines.remove(x)
+    #     return [inline(self.model, self.admin_site) for inline in inlines]
 
     def get_fields(self, request, obj=None):
         fields = super(ProjectAdmin, self).get_fields(request, obj)

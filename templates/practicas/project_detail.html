@@ -1,32 +1,54 @@
 {% extends 'base.html' %}
 
-{% load staticfiles %}
+{% load staticfiles %}\
+{% load bootstrap3 %}
 
-{% block title %}Proyecto | {{ object.name }}{% endblock %}
+{% block title %}Proyecto | {{ project.name }}{% endblock %}
 
 {% block heading %}
-    <h2>{{ object.name }}</h2>
+    <h2>{{ project.name }}</h2>
 {% endblock %}
 
 {% block content %}
-    <p><strong>Curso:</strong> {{ object.course }}</p>
-    <p><strong>Tutor:</strong> {{ object.tutor }}</p><br/>
+    <p><strong>Curso:</strong> {{ project.course }}</p>
+    <p><strong>Tutor:</strong> {{ project.tutor }}</p>
 
-    <p>{{ object.description }}</p>
-    <p>{{ object.report }}</p><br/>
+    <p>{{ project.description }}</p>
+    <p>{{ project.report }}</p></br>
 
-    {% block buttons %}
-        {% if not request %}
-            <a class="btn btn-primary" href="{% url 'request' object.slug %}" role="button">Solicitar</a>
-        {% elif not request.checked %}
-            <a class="btn btn-primary" href="{% url 'request-remove' object.slug %}" role="button">Cancelar
+    {% if not request %}
+        <p class="text-info">Puede solicitar este proyecto si así lo desea.</p>
+        <form action="" method="post">
+            {% csrf_token %}
+
+            {% bootstrap_form form %}
+            {% buttons %}
+                <button type="submit" class="btn btn-primary">Solicitar</button>
+                <a class="btn btn-default" href="{% url 'available_projects' %}" role="button">Volver al listado</a>
+            {% endbuttons %}
+        </form><br/>
+
+        <p class="text-justify">
+            El valor que asigne a su prioridad afecta a la probabilidad de que participe en el proyecto que usted está
+            solicitando. A menor prioridad (<strong>comenzando por 0</strong>), mayores serán sus posibilidades de
+            participación.<br/>
+
+            Tenga en cuenta asimismo que si solicita dos o más proyectos con igual prioridad, se entenderá que su
+            interés en participar en estos es el mismo.<br/>
+
+            En cualquier caso, la asignación de un proyecto depende además de la cantidad de estudiantes que necesite,
+            por lo que <strong>lamentablemente pudiera suceder</strong> que la opción a la que usted dio mayor
+            valoración no sea la que se le asigne.
+        </p>
+
+    {% else %}
+        {% if not request.checked %}
+            <a class="btn btn-primary" href="{% url 'request-remove' project.slug %}" role="button">Cancelar
                 solicitud</a>
         {% else %}
-            <p>
-                Su solicitud ha sido validada por el tutor del proyecto. Por favor, comuníquese con este si desea
-                cancelarla.
-            </p><br/>
+            <p class="text-warning">Su solicitud ha sido validada por el tutor del proyecto. Por favor, comuníquese con
+                este si desea cancelarla.</p><br/>
         {% endif %}
         <a class="btn btn-default" href="{% url 'available_projects' %}" role="button">Volver al listado</a>
-    {% endblock %}
+    {% endif %}
 {% endblock %}

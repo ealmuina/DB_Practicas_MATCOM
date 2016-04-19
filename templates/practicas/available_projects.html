@@ -10,8 +10,7 @@
 
 {% block content %}
     {% if available_projects %}
-        <p>
-        <h4>Proyectos solicitables:</h4>
+        <p><h4>Proyectos solicitables:</h4>
         <ul>
             {% for project in available_projects %}
                 <li><a href="{% url 'project-detail' project.slug %}">{{ project.name }}</a></li>
@@ -23,8 +22,7 @@
     {% endif %}
 
     {% if requested_projects %}
-        <p>
-        <h4>Proyectos solicitados:</h4>
+        <p><h4>Proyectos solicitados:</h4>
         <ol>
             {% for req in requested_projects %}
                 <li value="{{ req.priority }}"><a

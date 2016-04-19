@@ -66,31 +66,6 @@ def projects_available(request):
                   {'available_projects': available_projects, 'requested_projects': requested_projects})
 
 
-class ProjectDetailView(DetailView):
-    model = Project
-
-    def get_context_data(self, **kwargs):
-        context = super(ProjectDetailView, self).get_context_data(**kwargs)
-
-        project = context['object']
-        try:
-            reg_student = RegisteredStudent.objects.get(student__user=self.request.user, course=project.course)
-        except RegisteredStudent.DoesNotExist:
-            reg_student = None
-
-        if reg_student:
-            try:
-                context['request'] = Request.objects.get(project=project, reg_student=reg_student)
-            except Request.DoesNotExist:
-                context['request'] = None
-
-        return context
-
-    @method_decorator(login_required)
-    def dispatch(self, request, *args, **kwargs):
-        return super(ProjectDetailView, self).dispatch(request, *args, **kwargs)
-
-
 class ArchiveProjectDetailView(DetailView):
     model = Project
     template_name = 'practicas/archive_project_detail.html'
@@ -112,7 +87,7 @@ def request_remove(request, project_name_slug):
     req = get_object_or_404(Request, project=project, reg_student=reg_student)
     if not req.checked:
         req.delete()
-        return redirect('project-detail', project_name_slug, permanent=True)
+        return redirect('available_projects', permanent=True)
     else:
         return HttpResponseForbidden(
             """<h1>Error</h1>
@@ -121,21 +96,12 @@ def request_remove(request, project_name_slug):
 
 
 @permission_required('practicas.student_permissions')
-def request(request, project_name_slug):
+def project_detail(request, project_name_slug):
     try:
         project = Project.objects.get(slug=project_name_slug)
     except Project.DoesNotExist:
         project = None
     course, reg_student = get_course_and_reg_student(request)
-
-    # Verify the reg_student hasn't made a request to this project already.
-    try:
-        req = Request.objects.get(reg_student=reg_student, project=project)
-    except Request.DoesNotExist:
-        req = None
-
-    if req:
-        return HttpResponseForbidden("<h1>Error</h1>La solicitud que intenta crear ya existe.")
 
     # A HTTP POST?
     if request.method == 'POST':
@@ -150,8 +116,7 @@ def request(request, project_name_slug):
                 req.reg_student = reg_student
                 # Save the new request to the database and redirect to projects.
                 req.save()
-                return projects_available(
-                    request)  # TODO: Turn into a redirect, y que me muestre un cartelito de solicitud exitosa.
+                return redirect('available_projects', permanent=True)
         else:
             # The supplied form contained errors - just print them to the terminal.
             print(form.errors)
@@ -159,9 +124,16 @@ def request(request, project_name_slug):
         # If the request was not a POST, display the form to enter details.
         form = RequestForm()
 
+    context = {'form': form, 'project': project}
+
+    try:
+        context['request'] = Request.objects.get(project=project, reg_student=reg_student)
+    except Request.DoesNotExist:
+        context['request'] = None
+
     # Bad form (or form details), no form supplied...
     # Render rhe form with error messages (if any).
-    return render(request, 'practicas/request.html', {'form': form, 'project': project})
+    return render(request, 'practicas/project_detail.html', context)
 
 
 class ProjectArchive(ListView):

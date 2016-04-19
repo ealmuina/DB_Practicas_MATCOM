@@ -27,6 +27,9 @@ class RequestAdminForm(forms.ModelForm):
 
 
 class RequestForm(forms.ModelForm):
+    priority = forms.IntegerField(label='Prioridad', help_text='Por favor asigne una prioridad a su solicitud.',
+                                  initial=1)
+
     def clean(self):
         return validate_student_project_course(self)
 
