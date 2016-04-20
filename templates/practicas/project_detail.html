@@ -14,7 +14,7 @@
     <p><strong>Tutor:</strong> {{ project.tutor }}</p>
 
     <p>{{ project.description }}</p>
-    <p>{{ project.report }}</p></br>
+    <p>{{ project.report }}</p><br/>
 
     {% if not request %}
         <p class="text-info">Puede solicitar este proyecto si así lo desea.</p>
@@ -24,7 +24,7 @@
             {% bootstrap_form form %}
             {% buttons %}
                 <button type="submit" class="btn btn-primary">Solicitar</button>
-                <a class="btn btn-default" href="{% url 'available_projects' %}" role="button">Volver al listado</a>
+                <a class="btn btn-default" href="{% url 'projects-available' %}" role="button">Volver al listado</a>
             {% endbuttons %}
         </form><br/>
 
@@ -49,6 +49,6 @@
             <p class="text-warning">Su solicitud ha sido validada por el tutor del proyecto. Por favor, comuníquese con
                 este si desea cancelarla.</p><br/>
         {% endif %}
-        <a class="btn btn-default" href="{% url 'available_projects' %}" role="button">Volver al listado</a>
+        <a class="btn btn-default" href="{% url 'projects-available' %}" role="button">Volver al listado</a>
     {% endif %}
 {% endblock %}

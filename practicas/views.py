@@ -53,7 +53,7 @@ def projects_available(request):
                                               year__lte=reg_student.year)
     available_projects = []
     for req in requirements:
-        if not req.project in available_projects:
+        if req.project not in available_projects:
             available_projects.append(req.project)
 
     requested_projects = []
@@ -116,7 +116,7 @@ def project_detail(request, project_name_slug):
                 req.reg_student = reg_student
                 # Save the new request to the database and redirect to projects.
                 req.save()
-                return redirect('available_projects', permanent=True)
+                return redirect('projects-available', permanent=True)
         else:
             # The supplied form contained errors - just print them to the terminal.
             print(form.errors)
@@ -142,30 +142,40 @@ class ProjectArchive(ListView):
 
 
 @permission_required('practicas.tutor_permissions')
-def evaluate_participation(request, participation_id):
-    participation = get_object_or_404(Participation, id=participation_id)
+def evaluate_participations(request, project_name_slug):
+    # TODO: Esta vista no funciona actualmente. Buscar en Google como hacerla!!!!!!!!!!!
+    project = get_object_or_404(Project, slug=project_name_slug)
+    participations = Participation.objects.filter(project=project)
     tutor = Tutor.objects.get(user=request.user)
 
-    if tutor != participation.project.tutor:
+    if tutor != project.tutor:
         return HttpResponseForbidden(
-            "<h1>Error</h1>Usted no tiene permisos para modificar la participación solicitada.")
+            "<h1>Error</h1>Usted no tiene permiso para modificar las participaciones en el proyecto solicitado.")
 
     # A HTTP POST?
     if request.method == 'POST':
-        form = ParticipationForm(request.POST)
+        forms = []
+        for i in range(len(participations)):
+            forms.append(ParticipationForm(request.POST, prefix=str(i)))
 
-        # Have been provided with a valid form?
-        if form.is_valid():
-            part = form.save(commit=True)
-            # TODO: Arreglar para donde redirecciono
-            return index(request)
+        # Have been provided with valid forms?
+        valid = True
+        for form in forms:
+            valid = valid and form.is_valid()
+
+        if valid:
+            for form in forms:
+                form.save(commit=True)
+            return redirect(index, request)
         else:
-            # The supplied form contained errors - just print them to the terminal.
-            print(form.errors)
+            # The supplied forms contained errors - just print them to the terminal.
+            print(form.errors for form in forms)
     else:
-        # If the request was not a POST, display the form to enter details.
-        form = ParticipationForm(participation)
+        # If the request was not a POST, display the forms to enter details.
+        forms = []
+        for i in range(len(participations)):
+            forms.append(ParticipationForm(participations[i], prefix=str(i)))
 
     # Bad form (or form details), no form supplied...
     # Render rhe form with error messages (if any).
-    return render(request, 'practicas/evaluate_participation.html', {'form': form, 'participation': participation})
+    return render(request, 'practicas/evaluate_participation.html', {'forms': forms, 'participations': participations})

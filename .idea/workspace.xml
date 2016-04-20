@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="34f5c809-cf23-4667-91b9-f235287dff73" name="Default" comment="Added participation's evaluation.&#10;Login form now shows error message.&#10;...And some other changes I don't remember of.">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/set_participations.py" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/templates/practicas/request.html" afterPath="" />
+    <list default="true" id="34f5c809-cf23-4667-91b9-f235287dff73" name="Default" comment="Changes on request procedures.&#10;Added participations creation script.">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/db.sqlite3" afterPath="$PROJECT_DIR$/db.sqlite3" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/bd.iml" afterPath="$PROJECT_DIR$/.idea/bd.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/dataSources.xml" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/practicas/admin.py" afterPath="$PROJECT_DIR$/practicas/admin.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/practicas/forms.py" afterPath="$PROJECT_DIR$/practicas/forms.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/practicas/urls.py" afterPath="$PROJECT_DIR$/practicas/urls.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/practicas/views.py" afterPath="$PROJECT_DIR$/practicas/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/practicas/archive_project_detail.html" afterPath="$PROJECT_DIR$/templates/practicas/archive_project_detail.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/practicas/available_projects.html" afterPath="$PROJECT_DIR$/templates/practicas/available_projects.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/practicas/evaluate_participation.html" afterPath="$PROJECT_DIR$/templates/practicas/evaluate_participation.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/practicas/index.html" afterPath="$PROJECT_DIR$/templates/practicas/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/practicas/project_detail.html" afterPath="$PROJECT_DIR$/templates/practicas/project_detail.html" />
     </list>
     <ignored path="bd.iws" />
@@ -40,44 +39,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="set_participations.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/set_participations.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="populate_practicas.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/populate_practicas.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="194" column="14" selection-start-line="194" selection-start-column="14" selection-end-line="194" selection-end-column="14" />
-              <folding>
-                <element signature="e#0#9#0" expanded="true" />
-                <element signature="e#188#4003#0" expanded="false" />
-                <element signature="e#4074#4259#0" expanded="false" />
-                <element signature="e#4289#4362#0" expanded="false" />
-                <element signature="e#4397#4517#0" expanded="false" />
-                <element signature="e#4582#4774#0" expanded="false" />
-                <element signature="e#4846#5145#0" expanded="false" />
-                <element signature="e#5216#5447#0" expanded="false" />
-                <element signature="e#5501#5671#0" expanded="false" />
-                <element signature="e#5723#5875#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="project_detail.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="project_detail.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/practicas/project_detail.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5504587">
-              <caret line="32" column="114" selection-start-line="32" selection-start-column="114" selection-end-line="32" selection-end-column="114" />
+            <state vertical-scroll-proportion="-20.625">
+              <caret line="51" column="67" selection-start-line="51" selection-start-column="67" selection-end-line="51" selection-end-column="67" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="evaluate_participation.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/templates/practicas/evaluate_participation.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-10.625">
+              <caret line="17" column="28" selection-start-line="17" selection-start-column="28" selection-end-line="17" selection-end-column="28" />
               <folding />
             </state>
           </provider>
@@ -87,17 +63,17 @@
         <entry file="file://$PROJECT_DIR$/practicas/admin.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="132" column="54" selection-start-line="132" selection-start-column="54" selection-end-line="132" selection-end-column="54" />
+              <caret line="137" column="0" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="views.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/practicas/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="132" column="53" selection-start-line="132" selection-start-column="53" selection-end-line="132" selection-end-column="53" />
+            <state vertical-scroll-proportion="0.255137">
+              <caret line="144" column="88" selection-start-line="144" selection-start-column="88" selection-end-line="144" selection-end-column="88" />
               <folding>
                 <element signature="e#425#766#0" expanded="false" />
                 <element signature="e#809#1554#0" expanded="false" />
@@ -105,8 +81,9 @@
                 <element signature="e#2560#2995#0" expanded="false" />
                 <element signature="e#2687#2818#0" expanded="false" />
                 <element signature="e#2916#2995#0" expanded="false" />
+                <element signature="e#3104#3629#0" expanded="false" />
+                <element signature="e#3738#5118#0" expanded="false" />
                 <element signature="e#5157#5226#0" expanded="false" />
-                <element signature="e#5340#6431#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -116,24 +93,8 @@
         <entry file="file://$PROJECT_DIR$/practicas/forms.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="29" column="43" selection-start-line="29" selection-start-column="43" selection-end-line="29" selection-end-column="43" />
-              <folding>
-                <element signature="e#147#490#0" expanded="false" />
-                <element signature="e#538#669#0" expanded="false" />
-                <element signature="e#563#607#0" expanded="false" />
-                <element signature="e#633#669#0" expanded="false" />
-                <element signature="e#1061#1198#0" expanded="false" />
-                <element signature="e#1086#1130#0" expanded="false" />
-                <element signature="e#1156#1198#0" expanded="false" />
-                <element signature="e#1240#1904#0" expanded="false" />
-                <element signature="e#1265#1843#0" expanded="false" />
-                <element signature="e#1869#1904#0" expanded="false" />
-                <element signature="e#1957#2436#0" expanded="false" />
-                <element signature="e#1982#2364#0" expanded="false" />
-                <element signature="e#2390#2436#0" expanded="false" />
-                <element signature="e#2479#2544#0" expanded="false" />
-                <element signature="e#2499#2542#0" expanded="false" />
-              </folding>
+              <caret line="40" column="41" selection-start-line="40" selection-start-column="41" selection-end-line="40" selection-end-column="41" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -142,7 +103,7 @@
         <entry file="file://$PROJECT_DIR$/practicas/models.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="29" column="96" selection-start-line="29" selection-start-column="96" selection-end-line="29" selection-end-column="96" />
+              <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -152,7 +113,7 @@
         <entry file="file://$PROJECT_DIR$/practicas/urls.py">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="7" column="60" selection-start-line="7" selection-start-column="56" selection-end-line="7" selection-end-column="74" />
+              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -187,19 +148,19 @@
         <option value="$PROJECT_DIR$/populate_practicas.py" />
         <option value="$PROJECT_DIR$/templates/base.html" />
         <option value="$PROJECT_DIR$/templates/practicas/archive_projects.html" />
-        <option value="$PROJECT_DIR$/templates/practicas/index.html" />
-        <option value="$PROJECT_DIR$/templates/practicas/project_detail.html" />
         <option value="$PROJECT_DIR$/practicas/models.py" />
         <option value="$PROJECT_DIR$/templates/registration/login.html" />
-        <option value="$PROJECT_DIR$/templates/practicas/evaluate_participation.html" />
         <option value="$PROJECT_DIR$/templates/practicas/available_projects.html" />
         <option value="$PROJECT_DIR$/set_participations.py" />
         <option value="$PROJECT_DIR$/practicas/admin.py" />
+        <option value="$PROJECT_DIR$/templates/practicas/archive_project_detail.html" />
+        <option value="$PROJECT_DIR$/templates/practicas/request.html" />
+        <option value="$PROJECT_DIR$/templates/practicas/evaluate_participation.html" />
+        <option value="$PROJECT_DIR$/templates/practicas/index.html" />
+        <option value="$PROJECT_DIR$/templates/practicas/project_detail.html" />
         <option value="$PROJECT_DIR$/practicas/urls.py" />
         <option value="$PROJECT_DIR$/practicas/forms.py" />
         <option value="$PROJECT_DIR$/practicas/views.py" />
-        <option value="$PROJECT_DIR$/templates/practicas/archive_project_detail.html" />
-        <option value="$PROJECT_DIR$/templates/practicas/request.html" />
       </list>
     </option>
   </component>
@@ -211,8 +172,8 @@
   <component name="ProjectFrameBounds">
     <option name="x" value="-8" />
     <option name="y" value="-8" />
-    <option name="width" value="1936" />
-    <option name="height" value="1056" />
+    <option name="width" value="1382" />
+    <option name="height" value="744" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <OptionsSetting value="true" id="Add" />
@@ -240,6 +201,7 @@
     </navigator>
     <panes>
       <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -352,7 +314,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -608,10 +569,10 @@
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
         <env name="DJANGO_SETTINGS_MODULE" value="bd.settings" />
+        <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
-      <option name="SDK_HOME" value="C:\Program Files\Python35\python.exe" />
+      <option name="SDK_HOME" value="C:\Users\Eddy\AppData\Local\Programs\Python\Python35\python.exe" />
       <option name="WORKING_DIRECTORY" value="" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -709,7 +670,13 @@
       <option name="project" value="LOCAL" />
       <updated>1461009991759</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Changes on request procedures.&#10;Added participations creation script.">
+      <created>1461105468442</created>
+      <option name="number" value="00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1461105468442</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TodoView" selected-index="3">
@@ -722,21 +689,21 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15671642" sideWeight="0.4942717" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15885022" sideWeight="0.4942717" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3289689" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3206934" sideWeight="0.5021322" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32792208" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3267974" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32936078" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.46861473" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3517316" sideWeight="0.4978678" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.468039" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.35130718" sideWeight="0.4978678" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31751227" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22844176" sideWeight="0.5057283" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39718616" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3970588" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -788,7 +755,8 @@
     <MESSAGE value="Tutors can now manage their own projects" />
     <MESSAGE value="Started an archive... And maybe some other changes I don't remember" />
     <MESSAGE value="Added participation's evaluation.&#10;Login form now shows error message.&#10;...And some other changes I don't remember of." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added participation's evaluation.&#10;Login form now shows error message.&#10;...And some other changes I don't remember of." />
+    <MESSAGE value="Changes on request procedures.&#10;Added participations creation script." />
+    <option name="LAST_COMMIT_MESSAGE" value="Changes on request procedures.&#10;Added participations creation script." />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
@@ -798,15 +766,62 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/practicas/admin.py</url>
-          <line>106</line>
+          <line>111</line>
           <option name="timeStamp" value="18" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="python-line">
+          <url>file://$PROJECT_DIR$/practicas/views.py</url>
+          <line>179</line>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="19" />
+      <option name="time" value="20" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/practicas/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="133" column="18" selection-start-line="133" selection-start-column="18" selection-end-line="133" selection-end-column="18" />
+          <folding>
+            <element signature="e#425#766#0" expanded="false" />
+            <element signature="e#809#1554#0" expanded="false" />
+            <element signature="e#1648#2509#0" expanded="false" />
+            <element signature="e#2560#2995#0" expanded="false" />
+            <element signature="e#2687#2818#0" expanded="false" />
+            <element signature="e#2916#2995#0" expanded="false" />
+            <element signature="e#3104#3629#0" expanded="false" />
+            <element signature="e#3738#5118#0" expanded="false" />
+            <element signature="e#5157#5226#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/practicas/forms.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="30" column="43" selection-start-line="30" selection-start-column="43" selection-end-line="30" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/practicas/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="29" column="0" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/practicas/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="7" column="60" selection-start-line="7" selection-start-column="56" selection-end-line="7" selection-end-column="74" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/practicas/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -858,8 +873,9 @@
             <element signature="e#2560#2995#0" expanded="false" />
             <element signature="e#2687#2818#0" expanded="false" />
             <element signature="e#2916#2995#0" expanded="false" />
+            <element signature="e#3104#3629#0" expanded="false" />
+            <element signature="e#3738#5118#0" expanded="false" />
             <element signature="e#5157#5226#0" expanded="false" />
-            <element signature="e#5340#6431#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -884,23 +900,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="43" column="20" selection-start-line="43" selection-start-column="20" selection-end-line="43" selection-end-column="20" />
-          <folding>
-            <element signature="e#147#490#0" expanded="false" />
-            <element signature="e#538#669#0" expanded="false" />
-            <element signature="e#563#607#0" expanded="false" />
-            <element signature="e#633#669#0" expanded="false" />
-            <element signature="e#1061#1198#0" expanded="false" />
-            <element signature="e#1086#1130#0" expanded="false" />
-            <element signature="e#1156#1198#0" expanded="false" />
-            <element signature="e#1240#1904#0" expanded="false" />
-            <element signature="e#1265#1843#0" expanded="false" />
-            <element signature="e#1869#1904#0" expanded="false" />
-            <element signature="e#1957#2436#0" expanded="false" />
-            <element signature="e#1982#2364#0" expanded="false" />
-            <element signature="e#2390#2436#0" expanded="false" />
-            <element signature="e#2479#2544#0" expanded="false" />
-            <element signature="e#2499#2542#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1079,14 +1079,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/practicas/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/base.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1103,66 +1095,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/practicas/evaluate_participation.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="15" column="27" selection-start-line="15" selection-start-column="27" selection-end-line="15" selection-end-column="27" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/practicas/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="29" column="96" selection-start-line="29" selection-start-column="96" selection-end-line="29" selection-end-column="96" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/practicas/available_projects.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.37844038">
           <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://C:/Program Files/Python35/Lib/site-packages/Django-1.9.2-py3.5.egg/django/contrib/admin/options.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5479911">
-          <caret line="696" column="0" selection-start-line="696" selection-start-column="0" selection-end-line="696" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/practicas/forms.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="29" column="43" selection-start-line="29" selection-start-column="43" selection-end-line="29" selection-end-column="43" />
-          <folding>
-            <element signature="e#147#490#0" expanded="false" />
-            <element signature="e#538#669#0" expanded="false" />
-            <element signature="e#563#607#0" expanded="false" />
-            <element signature="e#633#669#0" expanded="false" />
-            <element signature="e#1061#1198#0" expanded="false" />
-            <element signature="e#1086#1130#0" expanded="false" />
-            <element signature="e#1156#1198#0" expanded="false" />
-            <element signature="e#1240#1904#0" expanded="false" />
-            <element signature="e#1265#1843#0" expanded="false" />
-            <element signature="e#1869#1904#0" expanded="false" />
-            <element signature="e#1957#2436#0" expanded="false" />
-            <element signature="e#1982#2364#0" expanded="false" />
-            <element signature="e#2390#2436#0" expanded="false" />
-            <element signature="e#2479#2544#0" expanded="false" />
-            <element signature="e#2499#2542#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/practicas/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="7" column="60" selection-start-line="7" selection-start-column="56" selection-end-line="7" selection-end-column="74" />
           <folding />
         </state>
       </provider>
@@ -1172,24 +1108,6 @@
         <state vertical-scroll-proportion="-9.375">
           <caret line="15" column="35" selection-start-line="15" selection-start-column="35" selection-end-line="15" selection-end-column="35" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/practicas/admin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="132" column="54" selection-start-line="132" selection-start-column="54" selection-end-line="132" selection-end-column="54" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/set_participations.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1212,10 +1130,66 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/practicas/views.py">
+    <entry file="file://$PROJECT_DIR$/practicas/admin.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="132" column="53" selection-start-line="132" selection-start-column="53" selection-end-line="132" selection-end-column="53" />
+          <caret line="137" column="0" selection-start-line="137" selection-start-column="0" selection-end-line="137" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/practicas/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-10.208333">
+          <caret line="36" column="19" selection-start-line="36" selection-start-column="19" selection-end-line="36" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/practicas/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/practicas/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="30" column="0" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/practicas/project_detail.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-20.625">
+          <caret line="51" column="67" selection-start-line="51" selection-start-column="67" selection-end-line="51" selection-end-column="67" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/practicas/forms.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="40" column="41" selection-start-line="40" selection-start-column="41" selection-end-line="40" selection-end-column="41" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/practicas/evaluate_participation.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-10.625">
+          <caret line="17" column="28" selection-start-line="17" selection-start-column="28" selection-end-line="17" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/practicas/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.255137">
+          <caret line="144" column="88" selection-start-line="144" selection-start-column="88" selection-end-line="144" selection-end-column="88" />
           <folding>
             <element signature="e#425#766#0" expanded="false" />
             <element signature="e#809#1554#0" expanded="false" />
@@ -1223,17 +1197,10 @@
             <element signature="e#2560#2995#0" expanded="false" />
             <element signature="e#2687#2818#0" expanded="false" />
             <element signature="e#2916#2995#0" expanded="false" />
+            <element signature="e#3104#3629#0" expanded="false" />
+            <element signature="e#3738#5118#0" expanded="false" />
             <element signature="e#5157#5226#0" expanded="false" />
-            <element signature="e#5340#6431#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/templates/practicas/project_detail.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5504587">
-          <caret line="32" column="114" selection-start-line="32" selection-start-column="114" selection-end-line="32" selection-end-column="114" />
-          <folding />
         </state>
       </provider>
     </entry>
