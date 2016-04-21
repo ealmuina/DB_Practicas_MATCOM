@@ -46,8 +46,10 @@
             <a class="btn btn-primary" href="{% url 'request-remove' project.slug %}" role="button">Cancelar
                 solicitud</a>
         {% else %}
-            <p class="text-warning">Su solicitud ha sido validada por el tutor del proyecto. Por favor, comuníquese con
-                este si desea cancelarla.</p><br/>
+            <div class="alert alert-warning text-justify" role="alert">
+                Su solicitud ha sido validada por el tutor del proyecto. Por favor, comuníquese con este si desea
+                cancelarla.
+            </div>
         {% endif %}
         <a class="btn btn-default" href="{% url 'projects-available' %}" role="button">Volver al listado</a>
     {% endif %}

@@ -87,7 +87,7 @@ def request_remove(request, project_name_slug):
     req = get_object_or_404(Request, project=project, reg_student=reg_student)
     if not req.checked:
         req.delete()
-        return redirect('available_projects', permanent=True)
+        return redirect('projects-available', permanent=True)
     else:
         return HttpResponseForbidden(
             """<h1>Error</h1>
