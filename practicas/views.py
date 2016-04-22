@@ -10,7 +10,7 @@ from .models import *
 
 def get_course_and_reg_student(request):
     try:
-        course = Course.objects.get(practice_start__year=date.today().year)
+        course = Course.objects.get(start__lte=date.today(), end__gte=date.today())
     except Course.DoesNotExist:
         course = None
 
@@ -29,6 +29,9 @@ def index(request):
     course, reg_student = get_course_and_reg_student(request)
 
     if course:
+        tutor_projects = Project.objects.filter(tutor__user=request.user, course=course)
+        context_dict['tutor_projects'] = tutor_projects
+
         if course.practice_running():
             context_dict['days_left'] = (course.practice_end - date.today()).days
         elif date.today() < course.practice_start:
@@ -143,30 +146,29 @@ class ProjectArchive(ListView):
 
 @permission_required('practicas.tutor_permissions')
 def evaluate_participations(request, project_name_slug):
-    # TODO: Esta vista no funciona actualmente. Buscar en Google como hacerla!!!!!!!!!!!
     project = get_object_or_404(Project, slug=project_name_slug)
+    course = get_object_or_404(Course, start__lte=date.today(), end__gte=date.today())
+
     participations = Participation.objects.filter(project=project)
     tutor = Tutor.objects.get(user=request.user)
 
-    if tutor != project.tutor:
+    if tutor != project.tutor or project.course != course:
         return HttpResponseForbidden(
             "<h1>Error</h1>Usted no tiene permiso para modificar las participaciones en el proyecto solicitado.")
 
     # A HTTP POST?
     if request.method == 'POST':
         forms = []
+        valid = True
         for i in range(len(participations)):
-            forms.append(ParticipationForm(request.POST, prefix=str(i)))
+            forms.append(ParticipationForm(request.POST, prefix=str(i), instance=participations[i]))
+            valid = valid and forms[i].is_valid()
 
         # Have been provided with valid forms?
-        valid = True
-        for form in forms:
-            valid = valid and form.is_valid()
-
         if valid:
-            for form in forms:
-                form.save(commit=True)
-            return redirect(index, request)
+            for i in range(len(forms)):
+                forms[i].save(commit=True)
+            return redirect(index)
         else:
             # The supplied forms contained errors - just print them to the terminal.
             print(form.errors for form in forms)
@@ -174,8 +176,11 @@ def evaluate_participations(request, project_name_slug):
         # If the request was not a POST, display the forms to enter details.
         forms = []
         for i in range(len(participations)):
-            forms.append(ParticipationForm(participations[i], prefix=str(i)))
+            forms.append(ParticipationForm(instance=participations[i], prefix=str(i)))
+
+    tuples = [(forms[i], participations[i]) for i in range(len(forms))]
 
     # Bad form (or form details), no form supplied...
     # Render rhe form with error messages (if any).
-    return render(request, 'practicas/evaluate_participation.html', {'forms': forms, 'participations': participations})
+    return render(request, 'practicas/evaluate_participation.html',
+                  {'tuples': tuples, 'project': participations[0].project})

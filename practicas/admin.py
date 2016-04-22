@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
-from .forms import CourseForm, RequestAdminForm, ParticipationForm, RegisteredStudentForm, ProjectForm
+from .forms import CourseForm, RequestAdminForm, ParticipationAdminForm, RegisteredStudentForm, ProjectForm
 from .models import *
 
 
@@ -18,6 +18,7 @@ def get_object_course(object_id):
 
 class AdminSite(admin.AdminSite):
     site_header = site_title = 'Administración de Prácticas'
+    login_template = 'registration/login.html'
 
 
 admin.site = AdminSite()
@@ -45,7 +46,7 @@ class RequestProjectInline(admin.TabularInline):
 class ParticipationInline(admin.TabularInline):
     model = Participation
     extra = 1
-    form = ParticipationForm
+    form = ParticipationAdminForm
 
 
 class MajorAdmin(admin.ModelAdmin):

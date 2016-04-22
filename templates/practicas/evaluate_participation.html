@@ -1,26 +1,54 @@
 {% extends 'base.html' %}
 
 {% load staticfiles %}
+{% load bootstrap3 %}
 
 {% block title %}Evaluar participación{% endblock %}
 
 {% block heading %}
-    <h2>Evaluar participación de {{ participation.reg_student.student }} en {{ participation.project }}</h2>
+    <h2>Evaluar participaciones en {{ project }}</h2>
 {% endblock %}
 
 {% block content %}
-    {% for form in forms %}
-        {{ form.non_field_errors }}
-        <div class="fieldWrapper">
-            {{ form.grade.errors }}
-            {#        <label for="{{ form.grade.id_for_label }}">Calificación:</label>#}
-            {{ form.grade.label_tag }}
-            {{ form.grade }}
-        </div>
-        <div class="fieldWrapper">
-            {{ form.tutor_report.errors }}
-            <label for="{{ form.tutor_report.id_for_label }}">Informe del tutor::</label>
-            {{ form.tutor_report }}
-        </div>
-    {% endfor %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Apellidos</th>
+                <th>Grupo</th>
+                <th>Calificación</th>
+                <th>Informe</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for form, participation in tuples %}
+                <tr>
+                    <th>{{ participation.reg_student.student.user.first_name }}</th>
+                    <th>{{ participation.reg_student.student.user.last_name }}</th>
+                    <th>{{ participation.reg_student.group }}</th>
+                    <th>
+                        <div class="fieldWrapper">
+                            {{ form.grade.errors }}
+                            {{ form.grade }}
+                        </div>
+                    </th>
+                    <th>
+                        <div class="fieldWrapper">
+                            {{ form.tutor_report.errors }}
+                            {{ form.tutor_report }}
+                        </div>
+                    </th>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            <a class="btn btn-default" href="{% url 'index' %}" role="button">Volver</a>
+        {% endbuttons %}
+    </form>
 {% endblock %}

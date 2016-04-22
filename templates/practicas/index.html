@@ -48,6 +48,18 @@
                 Las Prácticas están por comenzar. Entre <a href="/admin/practicas/project/">aquí</a> si desea gestionar
                 su lista de proyectos.
             </p>
+        {% elif days_left %}
+            <p>
+                Usted es tutor de los siguientes proyectos:
+            <ul>
+                {% for project in tutor_projects %}
+                    <a href="{% url 'participations-evaluate' project.slug %}">
+                        <li> {{ project.name }}</li>
+                    </a>
+                {% endfor %}
+            </ul>
+            Seleccione un proyecto si desea evaluar a los estudiantes participantes.
+            </p>
         {% endif %}
     {% endif %}
 {% endblock %}

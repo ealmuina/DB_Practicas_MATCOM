@@ -44,6 +44,15 @@ class ParticipationForm(forms.ModelForm):
 
     class Meta:
         model = Participation
+        exclude = ('project', 'reg_student')
+
+
+class ParticipationAdminForm(forms.ModelForm):
+    def clean(self):
+        return validate_student_project_course(self)
+
+    class Meta:
+        model = Participation
         exclude = ()
 
 
