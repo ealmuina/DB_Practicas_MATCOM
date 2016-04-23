@@ -74,8 +74,12 @@ class ArchiveProjectDetailView(DetailView):
     template_name = 'practicas/archive_project_detail.html'
 
     def get_context_data(self, **kwargs):
-        # TODO: Agregar las participaciones en el proyecto!
-        return super(ArchiveProjectDetailView, self).get_context_data(**kwargs)
+        context = super(ArchiveProjectDetailView, self).get_context_data(**kwargs)
+
+        participations = Participation.objects.filter(project=self.object)
+        context['participations'] = participations
+
+        return context
 
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):

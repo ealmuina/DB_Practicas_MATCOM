@@ -15,6 +15,30 @@
     <p>{{ object.description }}</p>
     <p>{{ object.report }}</p><br/>
 
-    <!-- TODO: Ver si se puede convertir en un BACK -->
+    <h4>Estudiantes participantes</h4>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellidos</th>
+            <th>Calificación</th>
+            <th>Informe del estudiante</th>
+            <th>Informe del tutor</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for part in participations %}
+            <tr>
+                <td>{{ part.reg_student.student.user.first_name }}</td>
+                <td>{{ part.reg_student.student.user.last_name }}</td>
+                <td>{{ part.grade }}</td>
+                <td>{{ part.report }}</td>
+                <td>{{ part.tutor_report }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table><br/>
+
     <a class="btn btn-primary" href="{% url 'archive-projects' %}" role="button">Volver al archivo</a>
 {% endblock %}
