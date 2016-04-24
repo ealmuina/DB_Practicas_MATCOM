@@ -1,9 +1,16 @@
 from datetime import date
 
 from django.contrib.auth.models import User, Group, Permission
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
+
+
+def validate_student_project_course(self):
+    if self.reg_student and self.project:
+        if self.reg_student.course != self.project.course:
+            raise ValidationError("El estudiante registrado y el proyecto deben corresponder al mismo curso.")
 
 
 class Student(models.Model):
@@ -47,6 +54,15 @@ class Course(models.Model):
         now = date.today()
         return now >= self.practice_start and now <= self.practice_end
 
+    def clean(self):
+        if self.start and self.end:
+            if self.start > self.end:
+                raise ValidationError("La fecha de inicio del curso debe ser anterior a la de finalización.")
+
+        if self.practice_start and self.practice_end:
+            if self.practice_start > self.practice_end:
+                raise ValidationError("La fecha de inicio de las prácticas debe ser anterior a la de finalización.")
+
     def __str__(self):
         return '%s-%s' % (self.start.year, self.end.year)
 
@@ -62,6 +78,13 @@ class RegisteredStudent(models.Model):
     year = models.IntegerField('año',
                                validators=[MinValueValidator(1, message='Las carreras comienzan a partir del año 1.')])
     group = models.CharField('grupo', max_length=200)
+
+    def clean(self):
+        if self.major and self.year:
+            if self.major.years < self.year:
+                raise ValidationError(
+                    "El año que cursa el estudiante no es válido. Su carrera consta de {0} años.".format(
+                        self.major.years))
 
     def __str__(self):
         return '{0} ({1})'.format(self.student, self.course)
@@ -100,6 +123,9 @@ class Request(models.Model):
     priority = models.PositiveIntegerField('prioridad', default=1)
     checked = models.BooleanField('confirmación del tutor', default=False)
 
+    def clean(self):
+        validate_student_project_course(self)
+
     def __str__(self):
         return "{0} a {1} ({2})".format(self.reg_student.student, self.project, self.project.course)
 
@@ -110,13 +136,16 @@ class Request(models.Model):
 
 
 class Participation(models.Model):
-    reg_student = models.OneToOneField('RegisteredStudent', verbose_name='estudiante registrado')
     project = models.ForeignKey('Project', verbose_name='proyecto')
+    reg_student = models.OneToOneField('RegisteredStudent', verbose_name='estudiante registrado')
 
     grade = models.PositiveIntegerField('calificación', blank=True, null=True,
                                         validators=[MaxValueValidator(5, "La máxima calificación es 5.")])
     report = models.FileField('informe del estudiante', blank=True)
     tutor_report = models.FileField('informe del tutor', blank=True)
+
+    def clean(self):
+        validate_student_project_course(self)
 
     def __str__(self):
         return "{0} en {1} ({2})".format(self.reg_student.student, self.project, self.project.course)

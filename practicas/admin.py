@@ -49,17 +49,20 @@ class ParticipationInline(admin.TabularInline):
     form = ParticipationAdminForm
 
 
+@admin.register(Major, site=admin.site)
 class MajorAdmin(admin.ModelAdmin):
     list_display = ['name', 'years']
     list_filter = ['years']
     search_fields = ['name']
 
 
+@admin.register(Workplace, site=admin.site)
 class WorkplaceAdmin(admin.ModelAdmin):
     list_display = ['name', 'address']
     search_fields = ['name']
 
 
+@admin.register(Course, site=admin.site)
 class CourseAdmin(admin.ModelAdmin):
     fieldsets = [
         (None, {'fields': ('start', 'end')}),
@@ -68,18 +71,21 @@ class CourseAdmin(admin.ModelAdmin):
     form = CourseForm
 
 
+@admin.register(Student, site=admin.site)
 class StudentAdmin(admin.ModelAdmin):
     search_fields = ['user__first_name', 'user__last_name']
 
 
+@admin.register(RegisteredStudent, site=admin.site)
 class RegisteredStudentAdmin(admin.ModelAdmin):
     list_display = ['student', 'course', 'major', 'group']
-    list_filter = ['course', 'major']
+    list_filter = ['course', 'major', 'year']
     search_fields = ['student__user__first_name', 'student__user__last_name']
     inlines = [RequestStudentInline, ParticipationInline]
     form = RegisteredStudentForm
 
 
+@admin.register(Project, site=admin.site)
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ['name', 'course', 'tutor']
     search_fields = ['name', 'tutor__user__first_name', 'tutor__user__last_name']
@@ -104,13 +110,13 @@ class ProjectAdmin(admin.ModelAdmin):
             return qs.filter(tutor=None)
         return qs.filter(tutor__user=request.user, course=course)
 
-    # def get_inline_instances(self, request, obj=None):
-    #     inlines = super(ProjectAdmin, self).get_inline_instances(request, obj)
-    #     if not request.user.is_superuser:
-    #         for x in inlines:
-    #             if type(x) is ParticipationInline:
-    #                 inlines.remove(x)
-    #     return [inline(self.model, self.admin_site) for inline in inlines]
+    def get_inline_instances(self, request, obj=None):
+        inlines = self.inlines[:]
+        if not request.user.is_superuser:
+            for x in inlines:
+                if x is ParticipationInline:
+                    inlines.remove(x)
+        return [inline(self.model, self.admin_site) for inline in inlines]
 
     def get_fields(self, request, obj=None):
         fields = super(ProjectAdmin, self).get_fields(request, obj)
@@ -145,6 +151,7 @@ class ProjectAdmin(admin.ModelAdmin):
         return super(ProjectAdmin, self).history_view(request, object_id, extra_context)
 
 
+@admin.register(Tutor, site=admin.site)
 class TutorAdmin(admin.ModelAdmin):
     search_fields = ['user__first_name', 'user__last_name']
     list_filter = ['category', 'workplace']
@@ -152,11 +159,3 @@ class TutorAdmin(admin.ModelAdmin):
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)
-
-admin.site.register(Course, CourseAdmin)
-admin.site.register(Major, MajorAdmin)
-admin.site.register(Workplace, WorkplaceAdmin)
-admin.site.register(Student, StudentAdmin)
-admin.site.register(RegisteredStudent, RegisteredStudentAdmin)
-admin.site.register(Project, ProjectAdmin)
-admin.site.register(Tutor, TutorAdmin)
