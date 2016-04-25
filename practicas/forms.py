@@ -9,27 +9,35 @@ class UserForm(forms.ModelForm):
     email = forms.EmailField(label='Email', max_length=200)
     first_name = forms.CharField(label='Nombre')
     last_name = forms.CharField(label='Apellidos')
-    password = forms.CharField(widget=forms.PasswordInput, label='Contraseña')
+    password = forms.CharField(widget=forms.PasswordInput, label='Contraseña', required=False)
 
     def __init__(self, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
-        if 'instance' in kwargs:
+        instance = kwargs.get('instance', None)
+        if instance:
             self.initial = {'username': self.instance.user.username,
                             'email': self.instance.user.email,
                             'first_name': self.instance.user.first_name,
                             'last_name': self.instance.user.last_name}
+        self.modify = True if instance else False
+
+    def clean_password(self):
+        password = self.cleaned_data['password']
+        if password == '' and not self.modify:
+            raise forms.ValidationError('Debe introducir una contraseña válida.')
+        return password
 
     def clean(self):
         super(UserForm, self).clean()
 
-        username = self.cleaned_data['username']
         email = self.cleaned_data['email']
-        password = self.cleaned_data['password']
         first_name = self.cleaned_data['first_name']
         last_name = self.cleaned_data['last_name']
+        username = self.cleaned_data.get('username', None)
+        password = self.cleaned_data.get('password', None)
 
         try:
-            if not self.instance:
+            if not self.modify:
                 self.instance.user = User.objects.create_user(username, email, password,
                                                               first_name=first_name,
                                                               last_name=last_name)
@@ -46,7 +54,9 @@ class UserForm(forms.ModelForm):
                 user.save()
 
         except IntegrityError:
-            raise ValidationError('El usuario que intenta crear ya existe.')
+            raise forms.ValidationError('El usuario que intenta crear ya existe.')
+        except ValueError:
+            raise forms.ValidationError('Debe especificar un nombre de usuario correcto.')
 
     class Meta:
         exclude = ('user',)
@@ -59,10 +69,20 @@ class StudentForm(UserForm):
 class TutorForm(UserForm):
     def __init__(self, *args, **kwargs):
         super(TutorForm, self).__init__(*args, **kwargs)
-        if 'instance' in kwargs:
+        instance = kwargs.get('instance', None)
+        if instance:
             self.initial['category'] = self.instance.category
             self.initial['workplace'] = self.instance.workplace
             self.initial['job'] = self.instance.job
+
+
+class PracticeManagerForm(UserForm):
+    def __init__(self, *args, **kwargs):
+        super(PracticeManagerForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+        if instance:
+            self.initial['course'] = self.instance.course
+            self.initial['year'] = self.instance.year
 
 
 class RequestAdminForm(forms.ModelForm):

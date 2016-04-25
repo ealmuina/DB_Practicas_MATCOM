@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
 from .forms import CourseForm, RequestAdminForm, ParticipationAdminForm, RegisteredStudentForm, ProjectForm, \
-    StudentForm, TutorForm
+    StudentForm, TutorForm, PracticeManagerForm
 from .models import *
 
 
@@ -203,6 +203,17 @@ class TutorAdmin(CustomUserAdmin):
         })
     ]
     form = TutorForm
+
+
+@admin.register(PracticeManager, site=admin.site)
+class PracticeManagerAdmin(CustomUserAdmin):
+    list_filter = ['course']
+    fieldsets = CustomUserAdmin.fieldsets + [
+        ('Datos de jefe de prácticas', {
+            'fields': ('course', 'year')
+        })
+    ]
+    form = PracticeManagerForm
 
 
 admin.site.register(User, UserAdmin)

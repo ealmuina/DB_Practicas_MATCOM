@@ -237,18 +237,21 @@ class Workplace(models.Model):
 
 class PracticeManager(models.Model):
     user = models.OneToOneField(User, verbose_name='usuario', unique=True)
-    course = models.ForeignKey(Cou)
+    course = models.ForeignKey(Course, verbose_name='curso')
+    year = models.IntegerField('año',
+                               validators=[MinValueValidator(1, message='Las carreras comienzan a partir del año 1.')])
 
     def save(self, *args, **kwargs):
-        student_permissions = Permission.objects.get(codename='student_permissions')
-        self.user.user_permissions.add(student_permissions)
+        manager_permissions = Permission.objects.get(codename='manager_permissions')
+        self.user.user_permissions.add(manager_permissions)
         super(PracticeManager, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.user.get_full_name()
 
     class Meta:
-        verbose_name = 'estudiante'
+        verbose_name = 'jefe de prácticas'
+        verbose_name_plural = 'jefes de prácticas'
         permissions = [
-            ('student_permissions', 'Tiene permisos de estudiante')
+            ('manager_permissions', 'Tiene permisos de jefe de practicas')
         ]
