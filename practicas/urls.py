@@ -3,8 +3,7 @@ from django.conf.urls import url
 from practicas import views
 
 urlpatterns = [
-    url(r'^$', views.index, name='index'),  # TODO: Unir URLs
-    url(r'^index/$', views.index, name='index'),
+    url(r'^$|^index/$', views.index, name='index'),
 
     url(r'^projects/$', views.projects_available, name='projects-available'),
     url(r'^projects/(?P<project_name_slug>[-\w]+)/$', views.project_detail, name='project-detail'),

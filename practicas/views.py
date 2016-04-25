@@ -51,13 +51,10 @@ def index(request):
 def projects_available(request):
     course, reg_student = get_course_and_reg_student(request)
 
-    # TODO: Averiguar si puedo pedir valores especificos de los objetos. En plan SELECT project FROM...
+    # TODO: Averiguar si puedo pedir valores especificos de los objetos. En plan SELECT DISTINCT project FROM...
     requirements = Requirement.objects.filter(project__course=course, major=reg_student.major,
                                               year__lte=reg_student.year)
-    available_projects = []
-    for req in requirements:
-        if req.project not in available_projects:
-            available_projects.append(req.project)
+    available_projects = set(req.project for req in requirements)
 
     requested_projects = []
     requests = Request.objects.filter(reg_student=reg_student).order_by('priority')

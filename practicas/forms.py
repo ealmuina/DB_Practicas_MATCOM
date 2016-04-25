@@ -42,16 +42,15 @@ class UserForm(forms.ModelForm):
                                                               first_name=first_name,
                                                               last_name=last_name)
             else:
-                user = self.instance.user
-                user.username = username
-                user.email = email
-                user.first_name = first_name
-                user.last_name = last_name
+                self.instance.user.username = username
+                self.instance.user.email = email
+                self.instance.user.first_name = first_name
+                self.instance.user.last_name = last_name
 
                 if password:
-                    user.set_password(password)
+                    self.instance.user.set_password(password)
 
-                user.save()
+                self.instance.user.save()
 
         except IntegrityError:
             raise forms.ValidationError('El usuario que intenta crear ya existe.')
