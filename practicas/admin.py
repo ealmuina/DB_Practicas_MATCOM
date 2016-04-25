@@ -3,7 +3,8 @@ from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 
-from .forms import CourseForm, RequestAdminForm, ParticipationAdminForm, RegisteredStudentForm, ProjectForm
+from .forms import CourseForm, RequestAdminForm, ParticipationAdminForm, RegisteredStudentForm, ProjectForm, \
+    StudentForm, TutorForm
 from .models import *
 
 
@@ -90,9 +91,22 @@ class CourseAdmin(admin.ModelAdmin):
     form = CourseForm
 
 
-@admin.register(Student, site=admin.site)
-class StudentAdmin(admin.ModelAdmin):
+class CustomUserAdmin(admin.ModelAdmin):
     search_fields = ['user__first_name', 'user__last_name']
+    fieldsets = [
+        ('Datos personales', {
+            'fields': ('first_name', 'last_name', 'email')
+        }),
+        ('Datos de usuario', {
+            'classes': ('collapse',),
+            'fields': ('username', 'password')
+        })
+    ]
+
+
+@admin.register(Student, site=admin.site)
+class StudentAdmin(CustomUserAdmin):
+    form = StudentForm
 
 
 @admin.register(RegisteredStudent, site=admin.site)
@@ -181,9 +195,14 @@ class ProjectAdmin(admin.ModelAdmin):
 
 
 @admin.register(Tutor, site=admin.site)
-class TutorAdmin(admin.ModelAdmin):
-    search_fields = ['user__first_name', 'user__last_name']
+class TutorAdmin(CustomUserAdmin):
     list_filter = ['category', 'workplace']
+    fieldsets = CustomUserAdmin.fieldsets + [
+        ('Datos de tutor', {
+            'fields': ('category', 'workplace', 'job')
+        })
+    ]
+    form = TutorForm
 
 
 admin.site.register(User, UserAdmin)
