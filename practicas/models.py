@@ -8,7 +8,7 @@ from django.template.defaultfilters import slugify
 
 
 def validate_student_project_course(self):
-    if self.reg_student and self.project:
+    if 'reg_student' in self.__dict__ and self.reg_student and 'project' in self.__dict__ and self.project:
         if self.reg_student.course != self.project.course:
             raise ValidationError("El estudiante registrado y el proyecto deben corresponder al mismo curso.")
 

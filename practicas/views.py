@@ -60,7 +60,7 @@ def projects_available(request):
             available_projects.append(req.project)
 
     requested_projects = []
-    requests = Request.objects.filter(reg_student=reg_student)
+    requests = Request.objects.filter(reg_student=reg_student).order_by('priority')
     for req in requests:
         available_projects.remove(req.project)
         requested_projects.append(req)
