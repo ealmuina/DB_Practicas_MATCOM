@@ -233,3 +233,22 @@ class Workplace(models.Model):
     class Meta:
         verbose_name = 'centro de trabajo'
         verbose_name_plural = 'centros de trabajo'
+
+
+class PracticeManager(models.Model):
+    user = models.OneToOneField(User, verbose_name='usuario', unique=True)
+    course = models.ForeignKey(Cou)
+
+    def save(self, *args, **kwargs):
+        student_permissions = Permission.objects.get(codename='student_permissions')
+        self.user.user_permissions.add(student_permissions)
+        super(PracticeManager, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.user.get_full_name()
+
+    class Meta:
+        verbose_name = 'estudiante'
+        permissions = [
+            ('student_permissions', 'Tiene permisos de estudiante')
+        ]
