@@ -16,6 +16,16 @@ def get_object_course(object_id):
     return project.course
 
 
+def get_queryset_with_matching_course(field, db_field, request):
+    if db_field.name in ('reg_student', 'project'):
+        if request._obj_:
+            field.queryset = field.queryset.filter(course=request._obj_.course)
+        else:
+            field.queryset = field.queryset.none()
+
+    return field
+
+
 class AdminSite(admin.AdminSite):
     site_header = site_title = 'Administración de Prácticas'
     login_template = 'registration/login.html'
@@ -29,17 +39,22 @@ class RequirementInline(admin.TabularInline):
     extra = 1
 
 
-class RequestStudentInline(admin.TabularInline):
+# TODO: DRY violation?
+class RequestInline(admin.TabularInline):
     model = Request
     extra = 1
     form = RequestAdminForm
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        field = super(RequestInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        return get_queryset_with_matching_course(field, db_field, request)
+
+
+class RequestStudentInline(RequestInline):
     exclude = ('checked',)
 
 
-class RequestProjectInline(admin.TabularInline):
-    model = Request
-    extra = 1
-    form = RequestAdminForm
+class RequestProjectInline(RequestInline):
     exclude = ('priority',)
 
 
@@ -47,6 +62,10 @@ class ParticipationInline(admin.TabularInline):
     model = Participation
     extra = 1
     form = ParticipationAdminForm
+
+    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
+        field = super(ParticipationInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        return get_queryset_with_matching_course(field, db_field, request)
 
 
 @admin.register(Major, site=admin.site)
@@ -84,6 +103,11 @@ class RegisteredStudentAdmin(admin.ModelAdmin):
     inlines = [RequestStudentInline, ParticipationInline]
     form = RegisteredStudentForm
 
+    def get_form(self, request, obj=None, **kwargs):
+        # just save obj reference for future processing in Inline
+        request._obj_ = obj
+        return super(RegisteredStudentAdmin, self).get_form(request, obj, **kwargs)
+
 
 @admin.register(Project, site=admin.site)
 class ProjectAdmin(admin.ModelAdmin):
@@ -98,6 +122,11 @@ class ProjectAdmin(admin.ModelAdmin):
             obj.tutor = Tutor.objects.get(user=request.user)
             obj.course = get_current_course()
         super(ProjectAdmin, self).save_model(request, obj, form, change)
+
+    def get_form(self, request, obj=None, **kwargs):
+        # just save obj reference for future processing in Inline
+        request._obj_ = obj
+        return super(ProjectAdmin, self).get_form(request, obj, **kwargs)
 
     def get_queryset(self, request):
         qs = super(ProjectAdmin, self).get_queryset(request)
