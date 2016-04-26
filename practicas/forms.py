@@ -102,6 +102,14 @@ class RequestForm(forms.ModelForm):
 class ParticipationForm(forms.ModelForm):
     grade = forms.IntegerField(max_value=5, min_value=2, required=False)
 
+    def __init__(self, *args, **kwargs):
+        course = kwargs.pop('course') if 'course' in kwargs else None
+        super(ParticipationForm, self).__init__(*args, **kwargs)
+        if course:
+            self.fields['project'] = forms.ModelChoiceField(queryset=Project.objects.filter(course=course))
+            if 'instance' in kwargs:
+                self.fields['project'].initial = kwargs['instance'].project
+
     class Meta:
         model = Participation
         exclude = ('project', 'reg_student')

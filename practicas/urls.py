@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^$|^index/$', views.index, name='index'),
 
     url(r'^projects/$', views.projects_available, name='projects-available'),
+    url(r'^projects/assign/$', views.assign_projects, name='projects-assign'),
     url(r'^projects/(?P<project_name_slug>[-\w]+)/$', views.project_detail, name='project-detail'),
     url(r'^projects/(?P<project_name_slug>[-\w]+)/remove_request/$', views.request_remove, name='request-remove'),
     url(r'^projects/(?P<project_name_slug>[-\w]+)/evaluate/$', views.evaluate_participations,

@@ -206,6 +206,7 @@ class Tutor(models.Model):
         change_requirement = Permission.objects.get(codename='change_requirement')
         delete_requirement = Permission.objects.get(codename='delete_requirement')
 
+        # TODO: Revisar q is_staff esta guardandose
         self.user.is_staff = True
         self.user.user_permissions.add(change_participation, add_project, change_project, change_request,
                                        add_requirement, change_requirement, delete_requirement)

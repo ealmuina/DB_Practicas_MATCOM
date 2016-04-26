@@ -143,6 +143,7 @@ def project_detail(request, project_name_slug):
 class ProjectArchive(ListView):
     model = Project
     template_name = 'practicas/archive_projects.html'
+    ordering = ['-course']
 
 
 @permission_required('practicas.tutor_permissions')
@@ -220,3 +221,55 @@ def upload_report(request):
     # Bad form (or form details), no form supplied...
     # Render rhe form with error messages (if any).
     return render(request, 'practicas/upload_report.html', {'form': form, 'participation': participation})
+
+
+@permission_required('practicas.manager_permissions')
+def assign_projects(request):
+    course = get_object_or_404(Course, start__lte=date.today(), end__gte=date.today())
+    manager = PracticeManager.objects.get(user=request.user, course=course)
+
+    reg_students = RegisteredStudent.objects.filter(course=course, year=manager.year) \
+        .order_by('group', 'student__user__last_name')
+
+    # A HTTP POST?
+    if request.method == 'POST':
+        forms = []
+        valid = True
+        for i in range(len(reg_students)):
+            try:
+                participation = Participation.objects.get(reg_student=reg_students[i])
+                forms.append(ParticipationForm(request.POST, prefix=str(i), instance=participation))
+            except Participation.DoesNotExist:
+                forms.append(ParticipationForm(request.POST, prefix=str(i), initial={'reg_student': reg_students[i]}))
+            valid = valid and forms[i].is_valid()
+
+        # Have been provided with valid forms?
+        if valid:
+            for i in range(len(forms)):
+                part = forms[i].save(commit=False)
+                if not part.project_id:
+                    print(int(forms[i].data['{0}-project'.format(i)]))
+                    part.project = Project.objects.get(id=int(forms[i].data['{0}-project'.format(i)]))
+                    part.reg_student = reg_students[i]
+                part.save()
+
+            return redirect(index, permanent=True)
+        else:
+            # The supplied forms contained errors - just print them to the terminal.
+            print(form.errors for form in forms)
+    else:
+        # If the request was not a POST, display the forms to enter details.
+        forms = []
+        for i in range(len(reg_students)):
+            try:
+                participation = Participation.objects.get(reg_student=reg_students[i])
+                forms.append(ParticipationForm(instance=participation, prefix=str(i), course=course))
+            except Participation.DoesNotExist:
+                forms.append(ParticipationForm(prefix=str(i), course=course, initial={'reg_student': reg_students[i]}))
+
+        tuples = [(forms[i], reg_students[i]) for i in range(len(forms))]
+
+        # Bad form (or form details), no form supplied...
+        # Render rhe form with error messages (if any).
+        return render(request, 'practicas/assign_projects.html',
+                      {'tuples': tuples, 'course': course, 'year': manager.year})

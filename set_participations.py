@@ -20,7 +20,7 @@ def set_participations():
         for req in requirements:
             project_capacity[proj] += req.students_count
 
-    reg_students = RegisteredStudent.objects.filter(course=course)
+    reg_students = RegisteredStudent.objects.filter(course=course).order_by('?')
     for rs in reg_students:
         requests = Request.objects.filter(reg_student=rs).order_by('priority')
         for req in requests:

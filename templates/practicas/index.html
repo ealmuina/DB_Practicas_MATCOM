@@ -61,5 +61,11 @@
             Seleccione un proyecto si desea evaluar a los estudiantes participantes.
             </p>
         {% endif %}
+    {% elif 'practicas.manager_permissions' in perms %}
+        Usted es jefe de las practicas!!!
+        <p>
+            Si lo desea puede gestionar <a href="{% url 'projects-assign' %}">aquí</a> la participación de los
+            estudiantes en los proyectos.
+        </p>
     {% endif %}
 {% endblock %}
