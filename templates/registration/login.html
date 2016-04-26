@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 
 {% load staticfiles %}
+{% load bootstrap3 %}
 
 {% block title %}Login{% endblock %}
 
 {% block navbar %}{% endblock %}
 
-{% block heading %}
+{% block content %}
     <link href="{% static 'bootstrap-3.3.6-dist/css/signin.css' %}" rel="stylesheet">
 
     <form class="form-signin" role="form" method="post" action=".">
@@ -14,11 +15,7 @@
 
         <h2 class="form-signin-heading">Inicio de Sesión</h2>
 
-        {% if form.non_field_errors %}
-            <div class="alert alert-danger" role="alert">
-                <strong>ERROR.</strong> {{ form.non_field_errors }}
-            </div>
-        {% endif %}
+        {% bootstrap_form_errors form %}
 
         <input class="form-control" placeholder="Nombre de usuario" id="id_username" maxlength="254" name="username"
                type="text"
@@ -34,11 +31,4 @@
         <button class="btn btn-lg btn-primary btn-block" type="submit" value="Submit">Iniciar sesión</button>
         <br/>
     </form>
-{% endblock %}
-
-{% block content %}
-    <h4 class="text-center">Sistema de Gestión de la Práctica Laboral e Investigativa de MATCOM</h4>
-    <p class="text-justify">Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum. Morbi
-        leo risus, porta ac
-        consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>
 {% endblock %}

@@ -34,8 +34,17 @@ def index(request):
 
         if course.practice_running():
             context_dict['days_left'] = (course.practice_end - date.today()).days
+
         elif date.today() < course.practice_start:
             context_dict['days_until'] = (course.practice_start - date.today()).days
+
+            if reg_student:
+                # TODO Averiguar si puedo pedir valores especificos de los objetos. En plan SELECT DISTINCT project FROM...
+                requirements = Requirement.objects.filter(project__course=course, major=reg_student.major,
+                                                          year__lte=reg_student.year).order_by('?')
+                available_projects = set(req.project for req in requirements)
+                context_dict['available_projects'] = list(available_projects)[:6]
+
         else:
             # Practice is over
             context_dict['days_after'] = (date.today() - course.practice_end).days
