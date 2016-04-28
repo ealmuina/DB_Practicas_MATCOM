@@ -40,7 +40,6 @@ class RequirementInline(admin.TabularInline):
     extra = 1
 
 
-# TODO: DRY violation?
 class RequestInline(admin.TabularInline):
     model = Request
     extra = 1

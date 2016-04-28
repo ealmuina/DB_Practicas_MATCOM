@@ -39,11 +39,9 @@ def index(request):
             context_dict['days_until'] = (course.practice_start - date.today()).days
 
             if reg_student:
-                # TODO Averiguar si puedo pedir valores especificos de los objetos. En plan SELECT DISTINCT project FROM...
-                requirements = Requirement.objects.filter(project__course=course, major=reg_student.major,
-                                                          year__lte=reg_student.year).order_by('?')
-                available_projects = set(req.project for req in requirements)
-                context_dict['available_projects'] = list(available_projects)[:6]
+                available_projects = Project.objects.filter(course=course, requirement__major=reg_student.major,
+                                                            requirement__year__lte=reg_student.year).order_by('?')
+                context_dict['available_projects'] = available_projects[:6]
 
         else:
             # Practice is over
@@ -60,16 +58,11 @@ def index(request):
 def projects_available(request):
     course, reg_student = get_course_and_reg_student(request)
 
-    # TODO: Averiguar si puedo pedir valores especificos de los objetos. En plan SELECT DISTINCT project FROM...
-    requirements = Requirement.objects.filter(project__course=course, major=reg_student.major,
-                                              year__lte=reg_student.year)
-    available_projects = set(req.project for req in requirements)
+    available_projects = Project.objects.filter(course=course, requirement__major=reg_student.major,
+                                                requirement__year__lte=reg_student.year) \
+        .exclude(request__reg_student=reg_student)
 
-    requested_projects = []
-    requests = Request.objects.filter(reg_student=reg_student).order_by('priority')
-    for req in requests:
-        available_projects.remove(req.project)
-        requested_projects.append(req)
+    requested_projects = Request.objects.filter(reg_student=reg_student).order_by('priority')
 
     return render(request, 'practicas/available_projects.html',
                   {'available_projects': available_projects, 'requested_projects': requested_projects})
