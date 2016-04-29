@@ -81,6 +81,7 @@ class PracticeManagerForm(UserForm):
         instance = kwargs.get('instance', None)
         if instance:
             self.initial['course'] = self.instance.course
+            self.initial['major'] = self.instance.major
             self.initial['year'] = self.instance.year
 
 

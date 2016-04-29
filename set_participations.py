@@ -22,7 +22,7 @@ def set_participations():
 
     reg_students = RegisteredStudent.objects.filter(course=course).order_by('?')
     for rs in reg_students:
-        requests = Request.objects.filter(reg_student=rs).order_by('priority')
+        requests = Request.objects.filter(reg_student=rs, checked=True).order_by('priority')
         for req in requests:
             if project_capacity[req.project] > 0:
                 part = Participation.objects.create(reg_student=rs, project=req.project)

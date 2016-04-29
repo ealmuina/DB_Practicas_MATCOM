@@ -55,7 +55,19 @@ class RequestStudentInline(RequestInline):
 
 
 class RequestProjectInline(RequestInline):
-    exclude = ('priority',)
+    fields = ('reg_student', 'project', 'checked')
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = super(RequestInline, self).get_readonly_fields(request, obj)
+        if not request.user.is_superuser:
+            readonly_fields += ('reg_student', 'reg_student')
+        return readonly_fields
+
+    def has_add_permission(self, request):
+        return request.user.is_superuser
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_superuser
 
 
 class ParticipationInline(admin.TabularInline):
@@ -195,6 +207,7 @@ class ProjectAdmin(admin.ModelAdmin):
 
 @admin.register(Tutor, site=admin.site)
 class TutorAdmin(CustomUserAdmin):
+    radio_fields = {'category': admin.HORIZONTAL}
     list_filter = ['category', 'workplace']
     fieldsets = CustomUserAdmin.fieldsets + [
         ('Datos de tutor', {
@@ -209,7 +222,7 @@ class PracticeManagerAdmin(CustomUserAdmin):
     list_filter = ['course']
     fieldsets = CustomUserAdmin.fieldsets + [
         ('Datos de jefe de prácticas', {
-            'fields': ('course', 'year')
+            'fields': ('course', 'major', 'year')
         })
     ]
     form = PracticeManagerForm

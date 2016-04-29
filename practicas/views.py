@@ -230,7 +230,7 @@ def assign_projects(request):
     course = get_object_or_404(Course, start__lte=date.today(), end__gte=date.today())
     manager = PracticeManager.objects.get(user=request.user, course=course)
 
-    reg_students = RegisteredStudent.objects.filter(course=course, year=manager.year) \
+    reg_students = RegisteredStudent.objects.filter(course=course, major=manager.major, year=manager.year) \
         .order_by('group', 'student__user__last_name')
 
     # A HTTP POST?

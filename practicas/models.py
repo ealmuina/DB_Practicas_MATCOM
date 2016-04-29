@@ -87,7 +87,7 @@ class RegisteredStudent(models.Model):
                         self.major.years))
 
     def __str__(self):
-        return '{0} ({1})'.format(self.student, self.course)
+        return '{0} ({1}) ({2})'.format(self.student, self.group, self.course)
 
     class Meta:
         verbose_name = 'estudiante registrado'
@@ -199,16 +199,20 @@ class Tutor(models.Model):
         self.user.user_permissions.add(tutor_permissions)
 
         change_participation = Permission.objects.get(codename='change_participation')
+
         add_project = Permission.objects.get(codename='add_project')
         change_project = Permission.objects.get(codename='change_project')
+        delete_project = Permission.objects.get(codename='delete_project')
+
         change_request = Permission.objects.get(codename='change_request')
+
         add_requirement = Permission.objects.get(codename='add_requirement')
         change_requirement = Permission.objects.get(codename='change_requirement')
         delete_requirement = Permission.objects.get(codename='delete_requirement')
 
         self.user.is_staff = True
-        self.user.user_permissions.add(change_participation, add_project, change_project, change_request,
-                                       add_requirement, change_requirement, delete_requirement)
+        self.user.user_permissions.add(change_participation, add_project, change_project, delete_project,
+                                       change_request, add_requirement, change_requirement, delete_requirement)
         self.user.save()
 
         super(Tutor, self).save(*args, **kwargs)
@@ -239,8 +243,16 @@ class Workplace(models.Model):
 class PracticeManager(models.Model):
     user = models.OneToOneField(User, verbose_name='usuario', unique=True)
     course = models.ForeignKey(Course, verbose_name='curso')
+    major = models.ForeignKey('Major', verbose_name='carrera')
     year = models.IntegerField('año',
                                validators=[MinValueValidator(1, message='Las carreras comienzan a partir del año 1.')])
+
+    def clean(self):
+        if self.major and self.year:
+            if self.major.years < self.year:
+                raise ValidationError(
+                    "El año que cursa el estudiante no es válido. Su carrera consta de {0} años.".format(
+                        self.major.years))
 
     def save(self, *args, **kwargs):
         manager_permissions = Permission.objects.get(codename='manager_permissions')
