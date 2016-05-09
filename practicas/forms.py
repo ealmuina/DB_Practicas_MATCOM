@@ -113,7 +113,7 @@ class ParticipationForm(forms.ModelForm):
 
     class Meta:
         model = Participation
-        exclude = ('project', 'reg_student')
+        exclude = ('reg_student',)
 
 
 class ParticipationAdminForm(forms.ModelForm):

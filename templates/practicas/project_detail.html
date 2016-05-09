@@ -14,7 +14,9 @@
     <p><strong>Tutor:</strong> {{ project.tutor }}</p>
 
     <p>{{ project.description }}</p>
-    <p>{{ project.report }}</p><br/>
+    {% if project.report %}
+        <p>Vea el <strong>informe del proyecto</strong> <a href="/media/{{ project.report }}">aquí</a>.</p><br/>
+    {% endif %}
 
     {% if not request %}
         <p class="text-info">Puede solicitar este proyecto si así lo desea.</p>

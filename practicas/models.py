@@ -22,9 +22,11 @@ fs = OverwriteStorage(location=MEDIA_ROOT)
 
 
 def validate_student_project_course(self):
-    if 'reg_student' in self.__dict__ and self.reg_student and 'project' in self.__dict__ and self.project:
+    try:
         if self.reg_student.course != self.project.course:
             raise ValidationError("El estudiante registrado y el proyecto deben corresponder al mismo curso.")
+    except AttributeError:
+        pass
 
 
 def make_project_report_name(instance, filename):
