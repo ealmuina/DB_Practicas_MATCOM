@@ -1,16 +1,45 @@
+import os
 from datetime import date
 
 from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
+from django.core.files.storage import FileSystemStorage
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.template.defaultfilters import slugify
+
+from bd.settings import MEDIA_ROOT
+
+
+class OverwriteStorage(FileSystemStorage):
+    def get_available_name(self, name, max_length=None):
+        if self.exists(name):
+            os.remove(os.path.join(MEDIA_ROOT, name))
+        return name
+
+
+fs = OverwriteStorage(location=MEDIA_ROOT)
 
 
 def validate_student_project_course(self):
     if 'reg_student' in self.__dict__ and self.reg_student and 'project' in self.__dict__ and self.project:
         if self.reg_student.course != self.project.course:
             raise ValidationError("El estudiante registrado y el proyecto deben corresponder al mismo curso.")
+
+
+def make_project_report_name(instance, filename):
+    ext = filename.split('.')[-1]
+    return 'Proyecto {0}.{1}'.format(instance.name, ext)
+
+
+def make_participation_student_report_name(instance, filename):
+    ext = filename.split('.')[-1]
+    return 'Informe de {0} (estudiante).{1}'.format(instance.reg_student, ext)
+
+
+def make_participation_tutor_report_name(instance, filename):
+    ext = filename.split('.')[-1]
+    return 'Informe de {0} (tutor).{1}'.format(instance.reg_student, ext)
 
 
 class Student(models.Model):
@@ -101,7 +130,7 @@ class Project(models.Model):
 
     name = models.CharField('nombre', max_length=200)
     description = models.TextField('descripción')
-    report = models.FileField('informe del tutor', blank=True)
+    report = models.FileField('informe del tutor', blank=True, storage=fs, upload_to=make_project_report_name)
 
     slug = models.SlugField(editable=False)
 
@@ -141,8 +170,11 @@ class Participation(models.Model):
 
     grade = models.PositiveIntegerField('calificación', blank=True, null=True,
                                         validators=[MaxValueValidator(5, "La máxima calificación es 5.")])
-    report = models.FileField('informe del estudiante', blank=True)
-    tutor_report = models.FileField('informe del tutor', blank=True)
+    report = models.FileField('informe del estudiante', blank=True, storage=fs,
+                              upload_to=make_participation_student_report_name)
+
+    tutor_report = models.FileField('informe del tutor', blank=True, storage=fs,
+                                    upload_to=make_participation_tutor_report_name)
 
     def clean(self):
         validate_student_project_course(self)

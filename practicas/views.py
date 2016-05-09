@@ -209,7 +209,6 @@ def upload_report(request):
             part = form.save(commit=False)
             # Did the user provide a report?
             if 'report' in request.FILES:
-                participation.report.delete()
                 part.report = request.FILES['report']
                 part.save()
                 return redirect(index, permanent=True)
