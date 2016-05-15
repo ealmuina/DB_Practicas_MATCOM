@@ -75,14 +75,49 @@ class TutorForm(UserForm):
             self.initial['job'] = self.instance.job
 
 
-class PracticeManagerForm(UserForm):
+class PracticeManagerForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(PracticeManagerForm, self).__init__(*args, **kwargs)
-        instance = kwargs.get('instance', None)
-        if instance:
-            self.initial['course'] = self.instance.course
-            self.initial['major'] = self.instance.major
-            self.initial['year'] = self.instance.year
+        self.fields['user'].queryset = User.objects.exclude(user_permissions__codename__exact='student_permissions')
+
+    class Meta:
+        model = PracticeManager
+        exclude = ()
+
+
+# class PracticeManagerForm(UserForm):
+#     course = forms.ModelChoiceField(Course.objects.all(), label='Curso')
+#     major = forms.ModelChoiceField(Major.objects.all(), label='Carrera')
+#     year = forms.IntegerField(max_value=5, min_value=1, label='Año')
+#
+#     def __init__(self, *args, **kwargs):
+#         super(PracticeManagerForm, self).__init__(*args, **kwargs)
+#         instance = kwargs.get('instance', None)
+#         if instance:
+#             self.initial['course'] = self.instance.practice.course
+#             self.initial['major'] = self.instance.practice.major
+#             self.initial['year'] = self.instance.practice.year
+#
+#     def clean(self):
+#         course = self.cleaned_data['course']
+#         major = self.cleaned_data['major']
+#         year = self.cleaned_data['year']
+#
+#         try:
+#             practice = Practice.objects.get(course=course,
+#                                             major=major,
+#                                             year=year)
+#             self.instance.practice = practice
+#             self.instance.save()
+#
+#         except Practice.DoesNotExist:
+#             raise ValidationError(
+#                 "No existe una práctica asignable al usuario. Verifique los datos de curso, carrera y año.")
+#
+#         super(PracticeManagerForm, self).clean()
+#
+#     class Meta:
+#         exclude = ('practice',)
 
 
 class RequestAdminForm(forms.ModelForm):
@@ -131,12 +166,49 @@ class CourseForm(forms.ModelForm):
 
 
 class RegisteredStudentForm(forms.ModelForm):
+    course = forms.ModelChoiceField(Course.objects.all(), label='Curso')
+    major = forms.ModelChoiceField(Major.objects.all(), label='Carrera')
+    year = forms.IntegerField(max_value=5, min_value=1, label='Año')
+
+    def __init__(self, *args, **kwargs):
+        super(RegisteredStudentForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+        if instance:
+            self.initial['course'] = self.instance.practice.course
+            self.initial['major'] = self.instance.practice.major
+            self.initial['year'] = self.instance.practice.year
+
+    def clean(self):
+        super(RegisteredStudentForm, self).clean()
+
+        course = self.cleaned_data['course']
+        major = self.cleaned_data['major']
+        year = self.cleaned_data['year']
+
+        try:
+            practice = Practice.objects.get(course=course,
+                                            major=major,
+                                            year=year)
+            self.instance.practice = practice
+            self.instance.save()
+
+        except Practice.DoesNotExist:
+            raise ValidationError(
+                "No existe una práctica asignable al estudiante. Verifique los datos de curso, carrera y año.")
+
     class Meta:
         model = RegisteredStudent
-        exclude = ()
+        exclude = ('practice',)
 
 
 class ProjectForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(ProjectForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+
+        self.fields['practices'].queryset = Practice.objects.filter(course=instance.course) if instance \
+            else Practice.objects.filter(start__gt=date.today())
+
     class Meta:
         model = Project
         exclude = ('slug',)

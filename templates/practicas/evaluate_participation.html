@@ -32,12 +32,12 @@
                     <td>{{ participation.reg_student.group }}</td>
                     <td>
                         {{ form.grade.errors }}
-                        {% bootstrap_field form.grade %}
+                        {{ form.grade }}
                     </td>
                     <td>{{ participation.report }}</td>
                     <td>
                         {{ form.tutor_report.errors }}
-                        {% bootstrap_field form.tutor_report %}
+                        {{ form.tutor_report }}
                     </td>
                 </tr>
             {% endfor %}

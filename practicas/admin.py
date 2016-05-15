@@ -1,9 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
 
-from .forms import CourseForm, RequestAdminForm, ParticipationAdminForm, RegisteredStudentForm, ProjectForm, \
+from .forms import RequestAdminForm, ParticipationAdminForm, RegisteredStudentForm, ProjectForm, \
     StudentForm, TutorForm, PracticeManagerForm
 from .models import *
 
@@ -22,8 +20,7 @@ def get_queryset_with_matching_course(field, db_field, request):
         if request._obj_:
             field.queryset = field.queryset.filter(course=request._obj_.course)
         else:
-            field.queryset = field.queryset.none()
-
+            field.queryset = field.queryset.filter(course=get_current_course())
     return field
 
 
@@ -83,13 +80,13 @@ class ParticipationInline(admin.TabularInline):
 @admin.register(Participation, site=admin.site)
 class ParticipationAdmin(admin.ModelAdmin):
     list_display = ['reg_student', 'project']
-    list_filter = ['reg_student__major', 'reg_student__course']
+    list_filter = ['reg_student__practice__major', 'reg_student__practice__course']
 
 
 @admin.register(Request, site=admin.site)
 class RequestAdmin(admin.ModelAdmin):
     list_display = ['reg_student', 'project', 'priority', 'checked']
-    list_filter = ['reg_student__major', 'reg_student__course']
+    list_filter = ['reg_student__practice__major', 'reg_student__course']
 
 
 @admin.register(Major, site=admin.site)
@@ -103,15 +100,6 @@ class MajorAdmin(admin.ModelAdmin):
 class WorkplaceAdmin(admin.ModelAdmin):
     list_display = ['name', 'address']
     search_fields = ['name']
-
-
-@admin.register(Course, site=admin.site)
-class CourseAdmin(admin.ModelAdmin):
-    fieldsets = [
-        (None, {'fields': ('start', 'end')}),
-        ('Prácticas', {'fields': ('practice_start', 'practice_end')})
-    ]
-    form = CourseForm
 
 
 class CustomUserAdmin(admin.ModelAdmin):
@@ -134,8 +122,8 @@ class StudentAdmin(CustomUserAdmin):
 
 @admin.register(RegisteredStudent, site=admin.site)
 class RegisteredStudentAdmin(admin.ModelAdmin):
-    list_display = ['student', 'course', 'major', 'group']
-    list_filter = ['course', 'major', 'year']
+    list_display = ['student', 'course', 'group']
+    list_filter = ['course', 'practice__major', 'practice__year']
     search_fields = ['student__user__first_name', 'student__user__last_name']
     inlines = [RequestStudentInline, ParticipationInline]
     form = RegisteredStudentForm
@@ -153,6 +141,8 @@ class ProjectAdmin(admin.ModelAdmin):
     list_filter = ['course']
     inlines = [RequirementInline, ParticipationInline, RequestProjectInline]
     form = ProjectForm
+    filter_horizontal = ('practices',)
+    fields = ['tutor', 'course', 'name', 'description', 'report', 'practices']
 
     def save_model(self, request, obj, form, change):
         if not request.user.is_superuser:
@@ -169,12 +159,7 @@ class ProjectAdmin(admin.ModelAdmin):
         qs = super(ProjectAdmin, self).get_queryset(request)
         if request.user.is_superuser:
             return qs
-
-        course = get_current_course()
-        if date.today() > course.practice_start:
-            # Practice is already started. Tutors can't modify their projects now.
-            return qs.filter(tutor=None)
-        return qs.filter(tutor__user=request.user, course=course)
+        return qs.filter(tutor__user=request.user, practices__start__gt=date.today())
 
     def get_inline_instances(self, request, obj=None):
         inlines = self.inlines[:]
@@ -185,36 +170,11 @@ class ProjectAdmin(admin.ModelAdmin):
         return [inline(self.model, self.admin_site) for inline in inlines]
 
     def get_fields(self, request, obj=None):
-        fields = super(ProjectAdmin, self).get_fields(request, obj)
+        fields = self.fields[:]
         if not request.user.is_superuser:
             fields.remove('tutor')
             fields.remove('course')
         return fields
-
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        if not request.user.is_superuser:
-            course = get_object_course(object_id)
-
-            if not self.get_queryset(request).filter(id=object_id).exists() or date.today() > course.practice_start:
-                return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
-
-        return super(ProjectAdmin, self).change_view(request, object_id, form_url, extra_context)
-
-    def delete_view(self, request, object_id, extra_context=None):
-        if not request.user.is_superuser:
-            course = get_object_course(object_id)
-
-            if not self.get_queryset(request).filter(id=object_id).exists() or date.today() > course.practice_start:
-                return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
-
-        return super(ProjectAdmin, self).delete_view(request, object_id, extra_context)
-
-    def history_view(self, request, object_id, extra_context=None):
-        if not request.user.is_superuser:
-            if not self.get_queryset(request).filter(id=object_id).exists():
-                return HttpResponseRedirect(reverse('admin:practicas_project_changelist'))
-
-        return super(ProjectAdmin, self).history_view(request, object_id, extra_context)
 
 
 @admin.register(Tutor, site=admin.site)
@@ -230,15 +190,18 @@ class TutorAdmin(CustomUserAdmin):
 
 
 @admin.register(PracticeManager, site=admin.site)
-class PracticeManagerAdmin(CustomUserAdmin):
-    list_filter = ['course']
-    fieldsets = CustomUserAdmin.fieldsets + [
-        ('Datos de jefe de prácticas', {
-            'fields': ('course', 'major', 'year')
-        })
-    ]
+class PracticeManagerAdmin(admin.ModelAdmin):
+    list_filter = ['practice__course']
+    # fieldsets = CustomUserAdmin.fieldsets + [
+    #     ('Datos de las prácticas', {
+    #         'fields': ('course', 'major', 'year')
+    #     })
+    # ]
     form = PracticeManagerForm
 
+
+admin.site.register(Practice)
+admin.site.register(Course)
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Group, GroupAdmin)

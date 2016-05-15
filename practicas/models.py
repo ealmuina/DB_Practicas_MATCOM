@@ -1,5 +1,4 @@
 import os
-from datetime import date
 
 from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
@@ -21,10 +20,10 @@ class OverwriteStorage(FileSystemStorage):
 fs = OverwriteStorage(location=MEDIA_ROOT)
 
 
-def validate_student_project_course(self):
+def validate_student_project_practice(self):
     try:
-        if self.reg_student.course != self.project.course:
-            raise ValidationError("El estudiante registrado y el proyecto deben corresponder al mismo curso.")
+        if self.reg_student.practice != self.project.practice:
+            raise ValidationError("El estudiante registrado y el proyecto deben corresponder a las mismas prácticas.")
     except AttributeError:
         pass
 
@@ -78,21 +77,9 @@ class Course(models.Model):
     start = models.DateField('fecha de inicio', unique=True)
     end = models.DateField('Fecha de finalización', unique=True)
 
-    practice_start = models.DateField('fecha de inicio de las prácticas', unique=True)
-    practice_end = models.DateField('fecha de finalización de las prácticas', unique=True)
-
-    def practice_running(self):
-        now = date.today()
-        return now >= self.practice_start and now <= self.practice_end
-
     def clean(self):
-        if self.start and self.end:
-            if self.start > self.end:
-                raise ValidationError("La fecha de inicio del curso debe ser anterior a la de finalización.")
-
-        if self.practice_start and self.practice_end:
-            if self.practice_start > self.practice_end:
-                raise ValidationError("La fecha de inicio de las prácticas debe ser anterior a la de finalización.")
+        if self.start and self.end and self.start > self.end:
+            raise ValidationError("La fecha de inicio del curso debe ser anterior a la de finalización.")
 
     def __str__(self):
         return '%s-%s' % (self.start.year, self.end.year)
@@ -101,24 +88,51 @@ class Course(models.Model):
         verbose_name = 'curso'
 
 
-class RegisteredStudent(models.Model):
-    student = models.ForeignKey('Student', verbose_name='estudiante')
+class Practice(models.Model):
     course = models.ForeignKey('Course', verbose_name='curso')
-    major = models.ForeignKey('Major', verbose_name='carrera')
 
+    start = models.DateField('fecha de inicio')
+    end = models.DateField('fecha de finalización')
+    major = models.ForeignKey('Major', verbose_name='carrera')
     year = models.IntegerField('año',
                                validators=[MinValueValidator(1, message='Las carreras comienzan a partir del año 1.')])
-    group = models.CharField('grupo', max_length=200)
 
     def clean(self):
-        if self.major and self.year:
-            if self.major.years < self.year:
-                raise ValidationError(
-                    "El año que cursa el estudiante no es válido. Su carrera consta de {0} años.".format(
-                        self.major.years))
+        # Validate practice time
+        if self.start and self.end and self.start > self.end:
+            raise ValidationError("La fecha de inicio de las prácticas debe ser anterior a la de finalización.")
+
+        # Validate practice is in course limits
+        if self.start and self.end and \
+                (self.start < self.course.start or self.end > self.course.end):
+            raise ValidationError("La fecha de la práctica no está dentro del curso especificado.")
+
+        # Validate year exists in that major
+        if self.major and self.year and self.major.years < self.year:
+            raise ValidationError(
+                "El año de la práctica no es válido. Su carrera consta de {0} años.".format(self.major.years))
+
+    def __str__(self):
+        return "{0} {1} {2}".format(self.major, self.year, self.course)
+
+    class Meta:
+        verbose_name = 'práctica'
+        unique_together = ('course', 'major', 'year')
+
+
+class RegisteredStudent(models.Model):
+    student = models.ForeignKey('Student', verbose_name='estudiante')
+    practice = models.ForeignKey('Practice', verbose_name='práctica')
+    course = models.ForeignKey('Course', verbose_name='curso')
+
+    group = models.CharField('grupo', max_length=200)
 
     def __str__(self):
         return '{0} ({1}) ({2})'.format(self.student, self.group, self.course)
+
+    def save(self, *args, **kwargs):
+        self.course = self.practice.course
+        super(RegisteredStudent, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'estudiante registrado'
@@ -127,8 +141,9 @@ class RegisteredStudent(models.Model):
 
 
 class Project(models.Model):
-    course = models.ForeignKey('Course', verbose_name='curso')
     tutor = models.ForeignKey('Tutor')
+    course = models.ForeignKey('Course', verbose_name='curso')
+    practices = models.ManyToManyField(Practice, verbose_name='prácticas')
 
     name = models.CharField('nombre', max_length=200)
     description = models.TextField('descripción')
@@ -155,7 +170,7 @@ class Request(models.Model):
     checked = models.BooleanField('confirmación del tutor', default=False)
 
     def clean(self):
-        validate_student_project_course(self)
+        validate_student_project_practice(self)
 
     def __str__(self):
         return "{0} a {1} ({2})".format(self.reg_student.student, self.project, self.project.course)
@@ -170,8 +185,11 @@ class Participation(models.Model):
     project = models.ForeignKey('Project', verbose_name='proyecto')
     reg_student = models.OneToOneField('RegisteredStudent', verbose_name='estudiante registrado')
 
+    proposed_grade = models.PositiveIntegerField('calificación propuesta', blank=True, null=True,
+                                                 validators=[MaxValueValidator(5, "La máxima calificación es 5.")])
     grade = models.PositiveIntegerField('calificación', blank=True, null=True,
                                         validators=[MaxValueValidator(5, "La máxima calificación es 5.")])
+
     report = models.FileField('informe del estudiante', blank=True, storage=fs,
                               upload_to=make_participation_student_report_name)
 
@@ -179,7 +197,7 @@ class Participation(models.Model):
                                     upload_to=make_participation_tutor_report_name)
 
     def clean(self):
-        validate_student_project_course(self)
+        validate_student_project_practice(self)
 
     def __str__(self):
         return "{0} en {1} ({2})".format(self.reg_student.student, self.project, self.project.course)
@@ -232,21 +250,22 @@ class Tutor(models.Model):
         tutor_permissions = Permission.objects.get(codename='tutor_permissions')
         self.user.user_permissions.add(tutor_permissions)
 
-        change_participation = Permission.objects.get(codename='change_participation')
+        perms = [
+            Permission.objects.get(codename='change_participation'),
 
-        add_project = Permission.objects.get(codename='add_project')
-        change_project = Permission.objects.get(codename='change_project')
-        delete_project = Permission.objects.get(codename='delete_project')
+            Permission.objects.get(codename='add_project'),
+            Permission.objects.get(codename='change_project'),
+            Permission.objects.get(codename='delete_project'),
 
-        change_request = Permission.objects.get(codename='change_request')
+            Permission.objects.get(codename='change_request'),
 
-        add_requirement = Permission.objects.get(codename='add_requirement')
-        change_requirement = Permission.objects.get(codename='change_requirement')
-        delete_requirement = Permission.objects.get(codename='delete_requirement')
+            Permission.objects.get(codename='add_requirement'),
+            Permission.objects.get(codename='change_requirement'),
+            Permission.objects.get(codename='delete_requirement'),
+        ]
 
         self.user.is_staff = True
-        self.user.user_permissions.add(change_participation, add_project, change_project, delete_project,
-                                       change_request, add_requirement, change_requirement, delete_requirement)
+        self.user.user_permissions.add(perms)
         self.user.save()
 
         super(Tutor, self).save(*args, **kwargs)
@@ -275,22 +294,14 @@ class Workplace(models.Model):
 
 
 class PracticeManager(models.Model):
-    user = models.OneToOneField(User, verbose_name='usuario', unique=True)
-    course = models.ForeignKey(Course, verbose_name='curso')
-    major = models.ForeignKey('Major', verbose_name='carrera')
-    year = models.IntegerField('año',
-                               validators=[MinValueValidator(1, message='Las carreras comienzan a partir del año 1.')])
-
-    def clean(self):
-        if self.major and self.year:
-            if self.major.years < self.year:
-                raise ValidationError(
-                    "El año que cursa el estudiante no es válido. Su carrera consta de {0} años.".format(
-                        self.major.years))
+    user = models.OneToOneField(User, verbose_name='usuario')
+    practice = models.ForeignKey('Practice', verbose_name='práctica')
 
     def save(self, *args, **kwargs):
         manager_permissions = Permission.objects.get(codename='manager_permissions')
         self.user.user_permissions.add(manager_permissions)
+        self.user.is_staff = True
+        self.user.save()
         super(PracticeManager, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -302,3 +313,4 @@ class PracticeManager(models.Model):
         permissions = [
             ('manager_permissions', 'Tiene permisos de jefe de practicas')
         ]
+        unique_together = ('user', 'practice')

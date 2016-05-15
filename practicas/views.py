@@ -8,44 +8,43 @@ from practicas.forms import RequestForm, ParticipationForm
 from .models import *
 
 
-def get_course_and_reg_student(request):
-    try:
-        course = Course.objects.get(start__lte=date.today(), end__gte=date.today())
-    except Course.DoesNotExist:
-        course = None
-
-    try:
-        reg_student = RegisteredStudent.objects.get(student__user=request.user, course=course)
-    except RegisteredStudent.DoesNotExist:
-        reg_student = None
-
-    return course, reg_student
-
-
 @login_required
 def index(request):
     context_dict = {}
 
-    course, reg_student = get_course_and_reg_student(request)
+    try:
+        reg_student = RegisteredStudent.objects.get(student__user=request.user, course__start__lte=date.today(),
+                                                    course__end__gte=date.today())
+        practice = reg_student.practice
+    except RegisteredStudent.DoesNotExist:
+        reg_student = None
+        try:
+            manager = PracticeManager.objects.get(user=request.user, practice__course__start__lte=date.today(),
+                                                  practice__course__end__gte=date.today())
+            practice = manager.practice
+        except PracticeManager.DoesNotExist:
+            practice = None
 
-    if course:
-        tutor_projects = Project.objects.filter(tutor__user=request.user, course=course)
-        context_dict['tutor_projects'] = tutor_projects
+    tutor_projects = Project.objects.filter(tutor__user=request.user, practices__start__lte=date.today(),
+                                            practices__end__gte=date.today())
+    context_dict['tutor_projects'] = tutor_projects
 
-        if course.practice_running():
-            context_dict['days_left'] = (course.practice_end - date.today()).days
+    if practice:
+        if practice.start <= date.today() <= practice.end:
+            context_dict['days_left'] = (practice.end - date.today()).days
 
-        elif date.today() < course.practice_start:
-            context_dict['days_until'] = (course.practice_start - date.today()).days
+        elif date.today() < practice.start:
+            context_dict['days_until'] = (practice.start - date.today()).days
 
             if reg_student:
-                available_projects = Project.objects.filter(course=course, requirement__major=reg_student.major,
+                available_projects = Project.objects.filter(practice=practice,
+                                                            requirement__major=reg_student.major,
                                                             requirement__year__lte=reg_student.year).order_by('?')
                 context_dict['available_projects'] = available_projects[:6]
 
         else:
             # Practice is over
-            context_dict['days_after'] = (date.today() - course.practice_end).days
+            context_dict['days_after'] = (date.today() - practice.end).days
             if reg_student:
                 # Current user is a student
                 grade = Participation.objects.get(reg_student=reg_student).grade
@@ -56,9 +55,11 @@ def index(request):
 
 @permission_required('practicas.student_permissions')
 def projects_available(request):
-    course, reg_student = get_course_and_reg_student(request)
+    reg_student = get_object_or_404(RegisteredStudent, student__user=request.user, course__start__lte=date.today(),
+                                    course__end__gte=date.today())
+    practice = reg_student.practice
 
-    available_projects = Project.objects.filter(course=course, requirement__major=reg_student.major,
+    available_projects = Project.objects.filter(practices=practice, requirement__major=reg_student.major,
                                                 requirement__year__lte=reg_student.year) \
         .exclude(request__reg_student=reg_student)
 
@@ -87,7 +88,9 @@ class ArchiveProjectDetailView(DetailView):
 
 @permission_required('practicas.student_permissions')
 def request_remove(request, project_name_slug):
-    course, reg_student = get_course_and_reg_student(request)
+    reg_student = get_object_or_404(RegisteredStudent, student__user=request.user, course__start__lte=date.today(),
+                                    course__end__gte=date.today())
+    practice = reg_student.practice
     project = get_object_or_404(Project, slug=project_name_slug)
 
     req = get_object_or_404(Request, project=project, reg_student=reg_student)
@@ -103,11 +106,11 @@ def request_remove(request, project_name_slug):
 
 @permission_required('practicas.student_permissions')
 def project_detail(request, project_name_slug):
-    try:
-        project = Project.objects.get(slug=project_name_slug)
-    except Project.DoesNotExist:
-        project = None
-    course, reg_student = get_course_and_reg_student(request)
+    project = get_object_or_404(Project, slug=project_name_slug)
+
+    reg_student = get_object_or_404(RegisteredStudent, student__user=request.user, course__start__lte=date.today(),
+                                    course__end__gte=date.today())
+    practice = reg_student.practice
 
     # A HTTP POST?
     if request.method == 'POST':
@@ -151,12 +154,12 @@ class ProjectArchive(ListView):
 @permission_required('practicas.tutor_permissions')
 def evaluate_participations(request, project_name_slug):
     project = get_object_or_404(Project, slug=project_name_slug)
-    course = get_object_or_404(Course, start__lte=date.today(), end__gte=date.today())
+    practice = get_object_or_404(Practice, start__lte=date.today(), end__gte=date.today())
 
     participations = Participation.objects.filter(project=project)
     tutor = Tutor.objects.get(user=request.user)
 
-    if tutor != project.tutor or project.course != course:
+    if tutor != project.tutor or project.practice != practice:
         return HttpResponseForbidden(
             "<h1>Error</h1>Usted no tiene permiso para modificar las participaciones en el proyecto solicitado.")
 
@@ -197,7 +200,9 @@ def evaluate_participations(request, project_name_slug):
 
 @permission_required('practicas.student_permissions')
 def upload_report(request):
-    course, reg_student = get_course_and_reg_student(request)
+    reg_student = get_object_or_404(RegisteredStudent, student__user=request.user, course__start__lte=date.today(),
+                                    course__end__gte=date.today())
+    practice = reg_student.practice
     participation = get_object_or_404(Participation, reg_student=reg_student)
 
     # A HTTP POST?
@@ -226,11 +231,11 @@ def upload_report(request):
 
 @permission_required('practicas.manager_permissions')
 def assign_projects(request):
-    course = get_object_or_404(Course, start__lte=date.today(), end__gte=date.today())
-    manager = PracticeManager.objects.get(user=request.user, course=course)
+    manager = PracticeManager.objects.get(user=request.user, practice__course__start__lte=date.today(),
+                                          practice__course__end__gte=date.today())
+    practice = manager.practice
 
-    reg_students = RegisteredStudent.objects.filter(course=course, major=manager.major, year=manager.year) \
-        .order_by('group', 'student__user__last_name')
+    reg_students = RegisteredStudent.objects.filter(practice=practice).order_by('group', 'student__user__last_name')
 
     # A HTTP POST?
     if request.method == 'POST':
@@ -264,13 +269,14 @@ def assign_projects(request):
         for i in range(len(reg_students)):
             try:
                 participation = Participation.objects.get(reg_student=reg_students[i])
-                forms.append(ParticipationForm(instance=participation, prefix=str(i), course=course))
+                forms.append(ParticipationForm(instance=participation, prefix=str(i), practice=practice))
             except Participation.DoesNotExist:
-                forms.append(ParticipationForm(prefix=str(i), course=course, initial={'reg_student': reg_students[i]}))
+                forms.append(
+                    ParticipationForm(prefix=str(i), practice=practice, initial={'reg_student': reg_students[i]}))
 
         tuples = [(forms[i], reg_students[i]) for i in range(len(forms))]
 
         # Bad form (or form details), no form supplied...
         # Render rhe form with error messages (if any).
         return render(request, 'practicas/assign_projects.html',
-                      {'tuples': tuples, 'course': course, 'year': manager.year})
+                      {'tuples': tuples, 'practice': practice})

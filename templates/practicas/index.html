@@ -11,51 +11,41 @@
         <p class="lead">
             {{ user.first_name }},
 
-            {% if days_until %}
-                resta(n) <strong>{{ days_until }} día(s)</strong> para el comienzo de las Prácticas de Producción.
+            {% if user.is_superuser %}
+                puede administrar el sistema desde <a href="/admin/">aquí</a>.
 
-                {% if not user.is_superuser %}
-                    {% if 'practicas.student_permissions' in perms %}
-                        Elige en qué proyectos te gustaría participar si no lo has hecho aún.
-                        <p><a class="btn btn-lg btn-success" href="{% url 'projects-available' %}" role="button">Mostrar
-                            proyectos</a></p>
-
-                    {% elif 'practicas.tutor_permissions' in perms %}
-                        Si lo desea, puede modificar sus propuestas o crear nuevos proyectos para desarrollar en el
-                        período de prácticas de este curso.
-                        <p><a class="btn btn-lg btn-success" href="/admin/practicas/project/" role="button">Gestionar
-                            proyectos</a></p>
-                    {% endif %}
-                {% endif %}
-
-            {% elif days_left %}
-                queda(n) <strong>{{ days_left }} día(s)</strong> para que concluyan las Prácticas de Producción.
-                {% if not user.is_superuser and 'practicas.student_permissions' in perms %}
+            {% elif 'practicas.student_permissions' in perms %}
+                {% if days_until %}
+                    resta(n) <strong>{{ days_until }} día(s)</strong> para el comienzo de las Prácticas de Producción.
+                    Elige en qué proyectos te gustaría participar si no lo has hecho aún.
+                    <p><a class="btn btn-lg btn-success" href="{% url 'projects-available' %}" role="button">Mostrar
+                        proyectos</a></p>
+                {% elif days_left %}
+                    queda(n) <strong>{{ days_left }} día(s)</strong> para que concluyan las Prácticas de Producción.
                     ¿Has terminado tu proyecto de prácticas? No olvides subir tu informe.
                     <p><a class="btn btn-lg btn-success" href="{% url 'upload-report' %}" role="button">Subir
                         informe</a></p>
+                {% else %}
+                    las Prácticas de Producción concluyeron hace <strong>{{ days_after }} día(s)</strong>. Tu
+                    calificación final es de <strong>{{ grade }} puntos</strong>
                 {% endif %}
 
-            {% else %}
-                las Prácticas de Producción concluyeron hace <strong>{{ days_after }} día(s)</strong>. Tu calificación
-                final es de <strong>{{ grade }} puntos</strong>
+            {% elif 'practicas.tutor_permissions' in perms %}
+                en este sitio usted puede crear o editar propuestas de proyectos para las prácticas; así como evaluar el
+                desempeño de los estudiantes participantes en estos.
+
+            {% elif 'practicas.manager_permissions' in perms %}
+                en este sitio usted puede editar la información referente a la participación de los estudiantes en los
+                proyectos de las prácticas.
+                <p><a class="btn btn-lg btn-success" href="{% url 'projects-assign' %}" role="button">Gestionar
+                    participaciones</a></p>
             {% endif %}
-        {% if not user.is_superuser and 'practicas.manager_permissions' in perms %}
-            Usted puede editar la información referente a la participación de los estudiantes en los proyectos de las
-            prácticas.
-            <p><a class="btn btn-lg btn-success" href="{% url 'projects-assign' %}" role="button">Gestionar
-                participaciones</a></p>
-        {% endif %}
-        </p>
     </div>
 
 {% endblock %}
 
 {% block content %}
-    {% if user.is_superuser %}
-        Puede administrar el sistema desde <a href="/admin/">aquí</a>.
-
-    {% elif 'practicas.student_permissions' in perms %}
+    {% if not user.is_superuser and 'practicas.student_permissions' in perms %}
         <p class="lead">Algunos de los proyectos que puedes solicitar:</p>
 
         {% for project in available_projects %}
@@ -65,10 +55,22 @@
             </div>
         {% endfor %}
 
-    {% elif 'practicas.tutor_permissions' in perms %}
-        {% if days_left %}
-            <p>
-                Usted es tutor de los siguientes proyectos:
+    {% elif not user.is_superuser and 'practicas.tutor_permissions' in perms %}
+        <h2>Gestión de proyectos</h2>
+
+        <div class="col-lg-8">
+            <p>Desde aquí puede modificar, o crear, sus propuestas de proyectos para próximas prácticas laborales; así
+                como establecer la participación de estudiantes en ellos.</p>
+        </div>
+        <p><a class="btn btn-lg btn-success" href="/admin/practicas/project/" role="button">Gestionar
+            proyectos</a></p>
+
+        <br/><br/>
+
+        {% if tutor_projects.count > 0 %}
+            <h2>Evaluación de estudiantes</h2>
+
+            Usted es tutor de los siguientes proyectos en desarrollo:
             <ul>
                 {% for project in tutor_projects %}
                     <a href="{% url 'participations-evaluate' project.slug %}">
@@ -77,7 +79,6 @@
                 {% endfor %}
             </ul>
             Seleccione un proyecto si desea evaluar a los estudiantes participantes.
-            </p>
         {% endif %}
     {% endif %}
 {% endblock %}
