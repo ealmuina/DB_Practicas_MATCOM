@@ -22,7 +22,7 @@ fs = OverwriteStorage(location=MEDIA_ROOT)
 
 def validate_student_project_practice(self):
     try:
-        if self.reg_student.practice != self.project.practice:
+        if self.reg_student.practice not in self.project.practices.iterator():
             raise ValidationError("El estudiante registrado y el proyecto deben corresponder a las mismas prácticas.")
     except AttributeError:
         pass
@@ -182,7 +182,7 @@ class Request(models.Model):
 
 
 class Participation(models.Model):
-    project = models.ForeignKey('Project', verbose_name='proyecto')
+    project = models.ForeignKey('Project', verbose_name='proyecto', blank=True, null=True)
     reg_student = models.OneToOneField('RegisteredStudent', verbose_name='estudiante registrado')
 
     proposed_grade = models.PositiveIntegerField('calificación propuesta', blank=True, null=True,
@@ -294,7 +294,7 @@ class Workplace(models.Model):
 
 
 class PracticeManager(models.Model):
-    user = models.OneToOneField(User, verbose_name='usuario')
+    user = models.ForeignKey(User, verbose_name='usuario')
     practice = models.ForeignKey('Practice', verbose_name='práctica')
 
     def save(self, *args, **kwargs):

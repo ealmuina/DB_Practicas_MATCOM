@@ -18,7 +18,7 @@
                 <th>Nombre</th>
                 <th>Apellidos</th>
                 <th>Grupo</th>
-                <th>Calificación</th>
+                <th>Calificación propuesta</th>
                 <th>Informe</th>
                 <th>Informe del tutor</th>
             </tr>
@@ -31,10 +31,11 @@
                     <td>{{ participation.reg_student.student.user.last_name }}</td>
                     <td>{{ participation.reg_student.group }}</td>
                     <td>
-                        {{ form.grade.errors }}
-                        {{ form.grade }}
+                        {{ form.proposed_grade.errors }}
+                        {{ form.proposed_grade }}
                     </td>
-                    <td>{{ participation.report }}</td>
+                    <td><a href="/media/{{ participation.report }}">...{{ participation.report.name|slice:"-15:" }}</a>
+                    </td>
                     <td>
                         {{ form.tutor_report.errors }}
                         {{ form.tutor_report }}

@@ -1,10 +1,14 @@
+from datetime import date
+
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models.aggregates import Sum
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, ListView
 
-from practicas.forms import RequestForm, ParticipationForm
+from practicas.forms import RequestForm, ParticipationAssignForm, ParticipationForm
+from set_participations import set_participations
 from .models import *
 
 
@@ -13,33 +17,44 @@ def index(request):
     context_dict = {}
 
     try:
-        reg_student = RegisteredStudent.objects.get(student__user=request.user, course__start__lte=date.today(),
-                                                    course__end__gte=date.today())
+        reg_student = RegisteredStudent.objects.get(student__user=request.user,
+                                                    practice__course__start__lte=date.today(),
+                                                    practice__course__end__gte=date.today())
         practice = reg_student.practice
+
     except RegisteredStudent.DoesNotExist:
         reg_student = None
+
         try:
             manager = PracticeManager.objects.get(user=request.user, practice__course__start__lte=date.today(),
                                                   practice__course__end__gte=date.today())
             practice = manager.practice
+            manager_projects = Project.objects.filter(practices=practice)
+
+            t = []
+            for proj in manager_projects:
+                total = Requirement.objects.filter(project=proj).aggregate(Sum('students_count'))
+                t.append((proj, total['students_count__sum']))
+            context_dict['manager_projects'] = t
+
         except PracticeManager.DoesNotExist:
             practice = None
 
     tutor_projects = Project.objects.filter(tutor__user=request.user, practices__start__lte=date.today(),
-                                            practices__end__gte=date.today())
+                                            practices__end__gte=date.today()).distinct()
     context_dict['tutor_projects'] = tutor_projects
 
     if practice:
         if practice.start <= date.today() <= practice.end:
-            context_dict['days_left'] = (practice.end - date.today()).days
+            context_dict['days_left'] = (practice.end - date.today()).days + 1
 
         elif date.today() < practice.start:
             context_dict['days_until'] = (practice.start - date.today()).days
 
             if reg_student:
-                available_projects = Project.objects.filter(practice=practice,
-                                                            requirement__major=reg_student.major,
-                                                            requirement__year__lte=reg_student.year).order_by('?')
+                available_projects = Project.objects.filter(practices=practice,
+                                                            requirement__major=practice.major,
+                                                            requirement__year__lte=practice.year).order_by('?')
                 context_dict['available_projects'] = available_projects[:6]
 
         else:
@@ -59,8 +74,8 @@ def projects_available(request):
                                     course__end__gte=date.today())
     practice = reg_student.practice
 
-    available_projects = Project.objects.filter(practices=practice, requirement__major=reg_student.major,
-                                                requirement__year__lte=reg_student.year) \
+    available_projects = Project.objects.filter(practices=practice, requirement__major=practice.major,
+                                                requirement__year__lte=practice.year) \
         .exclude(request__reg_student=reg_student)
 
     requested_projects = Request.objects.filter(reg_student=reg_student).order_by('priority')
@@ -154,12 +169,11 @@ class ProjectArchive(ListView):
 @permission_required('practicas.tutor_permissions')
 def evaluate_participations(request, project_name_slug):
     project = get_object_or_404(Project, slug=project_name_slug)
-    practice = get_object_or_404(Practice, start__lte=date.today(), end__gte=date.today())
-
+    current_projects = Project.objects.filter(tutor__user=request.user, practices__start__lte=date.today(),
+                                              practices__end__gte=date.today())
     participations = Participation.objects.filter(project=project)
-    tutor = Tutor.objects.get(user=request.user)
 
-    if tutor != project.tutor or project.practice != practice:
+    if project not in current_projects:
         return HttpResponseForbidden(
             "<h1>Error</h1>Usted no tiene permiso para modificar las participaciones en el proyecto solicitado.")
 
@@ -244,19 +258,20 @@ def assign_projects(request):
         for i in range(len(reg_students)):
             try:
                 participation = Participation.objects.get(reg_student=reg_students[i])
-                forms.append(ParticipationForm(request.POST, prefix=str(i), instance=participation))
+                forms.append(ParticipationAssignForm(request.POST, prefix=str(i), instance=participation))
             except Participation.DoesNotExist:
-                forms.append(ParticipationForm(request.POST, prefix=str(i), initial={'reg_student': reg_students[i]}))
+                forms.append(
+                    ParticipationAssignForm(request.POST, prefix=str(i), initial={'reg_student': reg_students[i]}))
             valid = valid and forms[i].is_valid()
 
         # Have been provided with valid forms?
         if valid:
             for i in range(len(forms)):
                 part = forms[i].save(commit=False)
-                if not part.project_id:
-                    print(int(forms[i].data['{0}-project'.format(i)]))
-                    part.project = Project.objects.get(id=int(forms[i].data['{0}-project'.format(i)]))
-                    part.reg_student = reg_students[i]
+                # if not part.project_id:
+                #     print(int(forms[i].data['{0}-project'.format(i)]))
+                #     part.project = Project.objects.get(id=int(forms[i].data['{0}-project'.format(i)]))
+                part.reg_student = reg_students[i]
                 part.save()
 
             return redirect(index, permanent=True)
@@ -269,14 +284,37 @@ def assign_projects(request):
         for i in range(len(reg_students)):
             try:
                 participation = Participation.objects.get(reg_student=reg_students[i])
-                forms.append(ParticipationForm(instance=participation, prefix=str(i), practice=practice))
+                forms.append(ParticipationAssignForm(instance=participation, prefix=str(i), practice=practice))
             except Participation.DoesNotExist:
                 forms.append(
-                    ParticipationForm(prefix=str(i), practice=practice, initial={'reg_student': reg_students[i]}))
+                    ParticipationAssignForm(prefix=str(i), practice=practice, initial={'reg_student': reg_students[i]}))
 
-        tuples = [(forms[i], reg_students[i]) for i in range(len(forms))]
+        tuples = [(forms[i], reg_students[i], forms[i].instance.proposed_grade if forms[i].instance else None) for i in
+                  range(len(forms))]
 
         # Bad form (or form details), no form supplied...
         # Render rhe form with error messages (if any).
         return render(request, 'practicas/assign_projects.html',
                       {'tuples': tuples, 'practice': practice})
+
+
+@permission_required('practicas.manager_permissions')
+def auto_assign_projects(request):
+    manager = PracticeManager.objects.get(user=request.user, practice__course__start__lte=date.today(),
+                                          practice__course__end__gte=date.today())
+    set_participations(manager)
+    return redirect(assign_projects)
+
+
+class RequestsList(ListView):
+    model = Request
+    template_name = 'practicas/requests_list.html'
+
+    def get_queryset(self):
+        manager = PracticeManager.objects.get(user=self.request.user, practice__course__start__lte=date.today(),
+                                              practice__course__end__gte=date.today())
+        return Request.objects.filter(project__practices=manager.practice).order_by('reg_student')
+
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(RequestsList, self).dispatch(request, *args, **kwargs)

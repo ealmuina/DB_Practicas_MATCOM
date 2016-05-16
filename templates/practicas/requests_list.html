@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}Solicitudes{% endblock %}
+
+{% block heading %}
+    <h1>Solicitudes</h1>
+{% endblock %}
+
+{% block content %}
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellidos</th>
+            <th>Grupo</th>
+            <th>Proyecto</th>
+            <th>Prioridad</th>
+            <th>Confirmada</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for request in object_list %}
+            <tr>
+                <td>{{ request.reg_student.student.user.first_name }}</td>
+                <td>{{ request.reg_student.student.user.last_name }}</td>
+                <td>{{ request.reg_student.group }}</td>
+                <td>{{ request.project }}</td>
+                <td>{{ request.priority }}</td>
+                {% if request.checked %}
+                    <td><img src="{% static 'icon-yes.png' %}"></td>
+                {% else %}
+                    <td><img src="{% static 'icon-no.png' %}"></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

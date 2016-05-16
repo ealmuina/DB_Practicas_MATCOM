@@ -45,7 +45,7 @@
 {% endblock %}
 
 {% block content %}
-    {% if not user.is_superuser and 'practicas.student_permissions' in perms %}
+    {% if not user.is_superuser and 'practicas.student_permissions' in perms and days_until %}
         <p class="lead">Algunos de los proyectos que puedes solicitar:</p>
 
         {% for project in available_projects %}
@@ -70,15 +70,39 @@
         {% if tutor_projects.count > 0 %}
             <h2>Evaluación de estudiantes</h2>
 
-            Usted es tutor de los siguientes proyectos en desarrollo:
+            <p>Usted es tutor de los siguientes proyectos en desarrollo. Seleccione alguno si desea evaluar la
+                participación de los estudiantes:</p>
+
             <ul>
                 {% for project in tutor_projects %}
-                    <a href="{% url 'participations-evaluate' project.slug %}">
-                        <li> {{ project.name }}</li>
-                    </a>
+                    <div class="col-lg-6">
+                        <a href="{% url 'participations-evaluate' project.slug %}">
+                            <li> {{ project.name }}</li>
+                        </a>
+                    </div>
                 {% endfor %}
             </ul>
-            Seleccione un proyecto si desea evaluar a los estudiantes participantes.
         {% endif %}
+
+    {% elif not user.is_superuser and 'practicas.manager_permissions' in perms %}
+        <h4>Proyectos disponibles para las prácticas</h4>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Estudiantes requeridos</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for project, sum in manager_projects %}
+                <tr>
+                    <td><a href="{% url 'archive-project-detail' project.slug %}">{{ project.name }}</a></td>
+                    <td>{{ sum }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <p class="text-justify">Puede ver las solicitudes hechas por los estudiantes <a
+                href="{% url 'requests-list' %}">aquí</a></p>
     {% endif %}
 {% endblock %}

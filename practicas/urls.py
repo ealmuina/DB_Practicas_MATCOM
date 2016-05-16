@@ -7,10 +7,13 @@ urlpatterns = [
 
     url(r'^projects/$', views.projects_available, name='projects-available'),
     url(r'^projects/assign/$', views.assign_projects, name='projects-assign'),
+    url(r'^projects/auto-assign/$', views.auto_assign_projects, name='projects-auto_assign'),
     url(r'^projects/(?P<project_name_slug>[-\w]+)/$', views.project_detail, name='project-detail'),
     url(r'^projects/(?P<project_name_slug>[-\w]+)/remove_request/$', views.request_remove, name='request-remove'),
     url(r'^projects/(?P<project_name_slug>[-\w]+)/evaluate/$', views.evaluate_participations,
         name='participations-evaluate'),
+
+    url(r'requests/$', views.RequestsList.as_view(), name='requests-list'),
 
     url(r'^upload_report/$', views.upload_report, name='upload-report'),
 

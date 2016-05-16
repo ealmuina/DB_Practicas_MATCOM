@@ -1,3 +1,5 @@
+from datetime import date
+
 from django import forms
 from django.db import IntegrityError
 
@@ -50,8 +52,6 @@ class UserForm(forms.ModelForm):
                 if password:
                     self.instance.user.set_password(password)
 
-                self.instance.user.save()
-
         except IntegrityError:
             raise forms.ValidationError('El usuario que intenta crear ya existe.')
         except ValueError:
@@ -78,46 +78,17 @@ class TutorForm(UserForm):
 class PracticeManagerForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(PracticeManagerForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+
         self.fields['user'].queryset = User.objects.exclude(user_permissions__codename__exact='student_permissions')
+
+        if not instance:
+            self.fields['practice'].queryset = Practice.objects.filter(course__start__lte=date.today(),
+                                                                       course__end__gte=date.today())
 
     class Meta:
         model = PracticeManager
         exclude = ()
-
-
-# class PracticeManagerForm(UserForm):
-#     course = forms.ModelChoiceField(Course.objects.all(), label='Curso')
-#     major = forms.ModelChoiceField(Major.objects.all(), label='Carrera')
-#     year = forms.IntegerField(max_value=5, min_value=1, label='Año')
-#
-#     def __init__(self, *args, **kwargs):
-#         super(PracticeManagerForm, self).__init__(*args, **kwargs)
-#         instance = kwargs.get('instance', None)
-#         if instance:
-#             self.initial['course'] = self.instance.practice.course
-#             self.initial['major'] = self.instance.practice.major
-#             self.initial['year'] = self.instance.practice.year
-#
-#     def clean(self):
-#         course = self.cleaned_data['course']
-#         major = self.cleaned_data['major']
-#         year = self.cleaned_data['year']
-#
-#         try:
-#             practice = Practice.objects.get(course=course,
-#                                             major=major,
-#                                             year=year)
-#             self.instance.practice = practice
-#             self.instance.save()
-#
-#         except Practice.DoesNotExist:
-#             raise ValidationError(
-#                 "No existe una práctica asignable al usuario. Verifique los datos de curso, carrera y año.")
-#
-#         super(PracticeManagerForm, self).clean()
-#
-#     class Meta:
-#         exclude = ('practice',)
 
 
 class RequestAdminForm(forms.ModelForm):
@@ -135,20 +106,26 @@ class RequestForm(forms.ModelForm):
         fields = ('priority',)
 
 
-class ParticipationForm(forms.ModelForm):
+class ParticipationAssignForm(forms.ModelForm):
     grade = forms.IntegerField(max_value=5, min_value=2, required=False)
 
     def __init__(self, *args, **kwargs):
-        course = kwargs.pop('course') if 'course' in kwargs else None
-        super(ParticipationForm, self).__init__(*args, **kwargs)
-        if course:
-            self.fields['project'] = forms.ModelChoiceField(queryset=Project.objects.filter(course=course))
-            if 'instance' in kwargs:
-                self.fields['project'].initial = kwargs['instance'].project
+        practice = kwargs.pop('practice') if 'practice' in kwargs else None
+        super(ParticipationAssignForm, self).__init__(*args, **kwargs)
+        if practice:
+            self.fields['project'] = forms.ModelChoiceField(queryset=Project.objects.filter(practices=practice))
+        if 'instance' in kwargs:
+            self.fields['project'].initial = kwargs['instance'].project
 
     class Meta:
         model = Participation
         exclude = ('reg_student',)
+
+
+class ParticipationForm(forms.ModelForm):
+    class Meta:
+        model = Participation
+        exclude = ('reg_student', 'project')
 
 
 class ParticipationAdminForm(forms.ModelForm):
@@ -190,7 +167,6 @@ class RegisteredStudentForm(forms.ModelForm):
                                             major=major,
                                             year=year)
             self.instance.practice = practice
-            self.instance.save()
 
         except Practice.DoesNotExist:
             raise ValidationError(

@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
 
@@ -159,7 +161,7 @@ class ProjectAdmin(admin.ModelAdmin):
         qs = super(ProjectAdmin, self).get_queryset(request)
         if request.user.is_superuser:
             return qs
-        return qs.filter(tutor__user=request.user, practices__start__gt=date.today())
+        return qs.filter(tutor__user=request.user, practices__start__gt=date.today()).distinct()
 
     def get_inline_instances(self, request, obj=None):
         inlines = self.inlines[:]
@@ -191,12 +193,8 @@ class TutorAdmin(CustomUserAdmin):
 
 @admin.register(PracticeManager, site=admin.site)
 class PracticeManagerAdmin(admin.ModelAdmin):
+    list_display = ['__str__', 'practice']
     list_filter = ['practice__course']
-    # fieldsets = CustomUserAdmin.fieldsets + [
-    #     ('Datos de las prácticas', {
-    #         'fields': ('course', 'major', 'year')
-    #     })
-    # ]
     form = PracticeManagerForm
 
 
