@@ -272,6 +272,7 @@ def assign_projects(request):
                 #     print(int(forms[i].data['{0}-project'.format(i)]))
                 #     part.project = Project.objects.get(id=int(forms[i].data['{0}-project'.format(i)]))
                 part.reg_student = reg_students[i]
+                part.proposed_grade = forms[i].initial['proposed_grade']
                 part.save()
 
             return redirect(index, permanent=True)

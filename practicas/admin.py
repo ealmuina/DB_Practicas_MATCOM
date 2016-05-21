@@ -79,16 +79,16 @@ class ParticipationInline(admin.TabularInline):
         return get_queryset_with_matching_course(field, db_field, request)
 
 
-@admin.register(Participation, site=admin.site)
-class ParticipationAdmin(admin.ModelAdmin):
-    list_display = ['reg_student', 'project']
-    list_filter = ['reg_student__practice__major', 'reg_student__practice__course']
+# @admin.register(Participation, site=admin.site)
+# class ParticipationAdmin(admin.ModelAdmin):
+#     list_display = ['reg_student', 'project']
+#     list_filter = ['reg_student__practice__major', 'reg_student__practice__course']
 
 
-@admin.register(Request, site=admin.site)
-class RequestAdmin(admin.ModelAdmin):
-    list_display = ['reg_student', 'project', 'priority', 'checked']
-    list_filter = ['reg_student__practice__major', 'reg_student__course']
+# @admin.register(Request, site=admin.site)
+# class RequestAdmin(admin.ModelAdmin):
+#     list_display = ['reg_student', 'project', 'priority', 'checked']
+#     list_filter = ['reg_student__practice__major', 'reg_student__course']
 
 
 @admin.register(Major, site=admin.site)

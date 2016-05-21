@@ -199,8 +199,37 @@ class Participation(models.Model):
     def clean(self):
         validate_student_project_practice(self)
 
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+        try:
+            old_part = Participation.objects.get(reg_student=self.reg_student)
+        except Participation.DoesNotExist:
+            old_part = None
+
+        if (not old_part or old_part.project != self.project) and self.project:
+            requirement = Requirement.objects.filter(project=self.project, major=self.reg_student.practice.major,
+                                                     year__lte=self.reg_student.practice.year,
+                                                     students_count__gt=0).order_by('year').last()
+            if requirement:
+                requirement.students_count -= 1
+                requirement.save()
+        if old_part and old_part.project and old_part.project != self.project:
+            requirement = Requirement.objects.filter(project=old_part.project, major=self.reg_student.practice.major,
+                                                     year__lte=self.reg_student.practice.year).order_by('year').last()
+            if requirement:
+                requirement.students_count += 1
+                requirement.save()
+        super().save(force_insert, force_update, using, update_fields)
+
+    def delete(self, using=None, keep_parents=False):
+        super().delete(using, keep_parents)
+        requirement = Requirement.objects.filter(project=self.project, major=self.reg_student.practice.major,
+                                                 year__lte=self.reg_student.practice.year).order_by('year').last()
+        requirement.students_count += 1
+        requirement.save()
+
     def __str__(self):
-        return "{0} en {1} ({2})".format(self.reg_student.student, self.project, self.project.course)
+        return "{0} en {1} ({2})".format(self.reg_student.student, self.project, self.reg_student.course)
 
     class Meta:
         verbose_name = 'participación'
@@ -300,7 +329,6 @@ class PracticeManager(models.Model):
     def save(self, *args, **kwargs):
         manager_permissions = Permission.objects.get(codename='manager_permissions')
         self.user.user_permissions.add(manager_permissions)
-        self.user.is_staff = True
         self.user.save()
         super(PracticeManager, self).save(*args, **kwargs)
 
