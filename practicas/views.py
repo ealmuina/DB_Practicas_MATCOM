@@ -171,7 +171,11 @@ def evaluate_participations(request, project_name_slug):
         # Have been provided with valid forms?
         if valid:
             for i in range(len(forms)):
-                forms[i].save(commit=True)
+                part = forms[i].save(commit=False)
+                # Did the tutor provide a report?
+                if '{0}-tutor_report'.format(i) in request.FILES:
+                    part.tutor_report = request.FILES['{0}-tutor_report'.format(i)]
+                part.save()
             return redirect(index)
         else:
             # The supplied forms contained errors - just print them to the terminal.

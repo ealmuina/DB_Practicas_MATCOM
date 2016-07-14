@@ -33,8 +33,8 @@
                 <td>{{ part.reg_student.student.user.first_name }}</td>
                 <td>{{ part.reg_student.student.user.last_name }}</td>
                 <td>{{ part.grade }}</td>
-                <td>{{ part.report }}</td>
-                <td>{{ part.tutor_report }}</td>
+                <td><a href="/media/{{ part.report }}">{{ part.report.name }}</a></td>
+                <td><a href="/media/{{ part.tutor_report }}">{{ part.tutor_report.name }}</a></td>
             </tr>
         {% endfor %}
         </tbody>

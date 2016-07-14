@@ -39,6 +39,8 @@ class RequestForm(forms.ModelForm):
 
 
 class ParticipationForm(forms.ModelForm):
+    grade = forms.IntegerField(max_value=5, min_value=2)
+
     def clean(self):
         return validate_student_project_course(self)
 
