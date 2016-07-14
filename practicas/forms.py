@@ -39,7 +39,7 @@ class RequestForm(forms.ModelForm):
 
 
 class ParticipationForm(forms.ModelForm):
-    grade = forms.IntegerField(max_value=5, min_value=2)
+    grade = forms.IntegerField(max_value=5, min_value=2, required=False)
 
     def clean(self):
         return validate_student_project_course(self)
@@ -107,30 +107,3 @@ class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         exclude = ('slug',)
-
-# class TutorForm(forms.ModelForm):
-#     first_name = forms.CharField(label='Nombre')
-#     last_name = forms.CharField(label='Apellidos')
-#     username = forms.CharField(label='Nombre de usuario')
-#     password = forms.CharField(widget=forms.PasswordInput())
-#     email = forms.EmailField()
-#
-#     user = forms.IntegerField(widget=forms.HiddenInput())
-#
-#     def clean(self):
-#         cleaned_data = self.cleaned_data
-#
-#         username = cleaned_data['username']
-#         email = cleaned_data['email']
-#         password = cleaned_data['password']
-#         first_name = cleaned_data['first_name']
-#         last_name = cleaned_data['last_name']
-#
-#         user = User(username=username, email=email, password=password, first_name=first_name, last_name=last_name)
-#         cleaned_data['user'] = user
-#
-#         return cleaned_data
-#
-#     class Meta:
-#         model = Tutor
-#         exclude = ()

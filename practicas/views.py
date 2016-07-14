@@ -174,9 +174,10 @@ def evaluate_participations(request, project_name_slug):
                 part = forms[i].save(commit=False)
                 # Did the tutor provide a report?
                 if '{0}-tutor_report'.format(i) in request.FILES:
+                    participations[i].tutor_report.delete()
                     part.tutor_report = request.FILES['{0}-tutor_report'.format(i)]
                 part.save()
-            return redirect(index)
+            return redirect(index, permanent=True)
         else:
             # The supplied forms contained errors - just print them to the terminal.
             print(form.errors for form in forms)
@@ -192,3 +193,33 @@ def evaluate_participations(request, project_name_slug):
     # Render rhe form with error messages (if any).
     return render(request, 'practicas/evaluate_participation.html',
                   {'tuples': tuples, 'project': participations[0].project})
+
+
+@permission_required('practicas.student_permissions')
+def upload_report(request):
+    course, reg_student = get_course_and_reg_student(request)
+    participation = get_object_or_404(Participation, reg_student=reg_student)
+
+    # A HTTP POST?
+    if request.method == 'POST':
+        form = ParticipationForm(request.POST, instance=participation)
+
+        # Have been provided with a valid form?
+        if form.is_valid():
+            part = form.save(commit=False)
+            # Did the user provide a report?
+            if 'report' in request.FILES:
+                participation.report.delete()
+                part.report = request.FILES['report']
+                part.save()
+                return redirect(index, permanent=True)
+        else:
+            # The supplied form contained errors - just print them to the terminal.
+            print(form.errors)
+    else:
+        # If the request was not a POST, display the form to enter details.
+        form = ParticipationForm(instance=participation)
+
+    # Bad form (or form details), no form supplied...
+    # Render rhe form with error messages (if any).
+    return render(request, 'practicas/upload_report.html', {'form': form, 'participation': participation})

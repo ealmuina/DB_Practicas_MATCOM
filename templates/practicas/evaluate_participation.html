@@ -31,17 +31,13 @@
                     <th>{{ participation.reg_student.student.user.last_name }}</th>
                     <th>{{ participation.reg_student.group }}</th>
                     <th>
-                        <div class="fieldWrapper">
-                            {{ form.grade.errors }}
-                            {{ form.grade }}
-                        </div>
+                        {{ form.grade.errors }}
+                        {% bootstrap_field form.grade %}
                     </th>
                     <th>{{ participation.report }}</th>
                     <th>
-                        <div class="fieldWrapper">
-                            {{ form.tutor_report.errors }}
-                            {{ form.tutor_report }}
-                        </div>
+                        {{ form.tutor_report.errors }}
+                        {% bootstrap_field form.tutor_report %}
                     </th>
                 </tr>
             {% endfor %}

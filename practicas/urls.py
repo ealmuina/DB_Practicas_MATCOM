@@ -12,6 +12,8 @@ urlpatterns = [
     url(r'^projects/(?P<project_name_slug>[-\w]+)/evaluate/$', views.evaluate_participations,
         name='participations-evaluate'),
 
+    url(r'^upload_report/$', views.upload_report, name='upload-report'),
+
     url(r'^archive/projects/$', views.ProjectArchive.as_view(), name='archive-projects'),
     url(r'^archive/projects/(?P<slug>[-\w]+)/$', views.ArchiveProjectDetailView.as_view(),
         name='archive-project-detail')
